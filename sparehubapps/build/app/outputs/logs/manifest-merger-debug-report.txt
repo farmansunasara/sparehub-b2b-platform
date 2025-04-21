@@ -1,0 +1,401 @@
+-- Merging decision tree log ---
+application
+INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:5:5-37:19
+INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+MERGED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:8:5-32:19
+MERGED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:8:5-32:19
+MERGED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:7:5-12:19
+MERGED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:7:5-12:19
+MERGED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:22:5-29:19
+MERGED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:22:5-29:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:28:5-89
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\862a878762e6e9e948ef5b43f04300c3\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\862a878762e6e9e948ef5b43f04300c3\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\409256ed23ba001d948c62172f8e79b0\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\409256ed23ba001d948c62172f8e79b0\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
+	android:extractNativeLibs
+		INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
+	android:name
+		INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml
+manifest
+ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:1:1-49:12
+MERGED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:1:1-49:12
+INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml:1:1-7:12
+INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml:1:1-7:12
+INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml:1:1-7:12
+MERGED from [:shared_preferences_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\shared_preferences_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
+MERGED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-34:12
+MERGED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-14:12
+MERGED from [:connectivity_plus] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\connectivity_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
+MERGED from [:flutter_plugin_android_lifecycle] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
+MERGED from [:flutter_secure_storage] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\flutter_secure_storage\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-10:12
+MERGED from [:path_provider_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
+MERGED from [:sqflite_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\sqflite_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.preference:preference:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\88a717a1155d369bee0ca40c5055059f\transformed\preference-1.2.1\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\fc86d529c8262d5247b0c7d42de1f86f\transformed\appcompat-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] C:\Users\farma\.gradle\caches\transforms-3\aad290cbdc0b81fa8322451e13ac9dcd\transformed\jetified-fragment-ktx-1.7.1\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\farma\.gradle\caches\transforms-3\307aa7cf29848b32468d9bb64a398db3\transformed\fragment-1.7.1\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.activity:activity-ktx:1.9.3] C:\Users\farma\.gradle\caches\transforms-3\54e66e7dcbe5714281995486bbadeed8\transformed\jetified-activity-ktx-1.9.3\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.activity:activity:1.9.3] C:\Users\farma\.gradle\caches\transforms-3\9be994f55c6dbb1a4a767c5d2117ea3d\transformed\jetified-activity-1.9.3\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.browser:browser:1.8.0] C:\Users\farma\.gradle\caches\transforms-3\b75befc56af4d595501b01a6382b1c71\transformed\browser-1.8.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\7436818421ce034d6df82e3bf5baac61\transformed\recyclerview-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\1c9310f778d53788f6e0f5d781d0fcbb\transformed\legacy-support-core-ui-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\66100374523b1f03b4a7887219144572\transformed\slidingpanelayout-1.2.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:17:1-31:12
+MERGED from [androidx.window:window-java:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\7b23248398381714ee3ae780e5705ed5\transformed\jetified-window-java-1.2.0\AndroidManifest.xml:17:1-21:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\b37b7164471816d532419c0191be2be7\transformed\legacy-support-core-utils-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\c352d8da7edc3677fabc8dedcb5ae1d0\transformed\loader-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\0c9e0193023c40e4169839e21f4ccd75\transformed\viewpager-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abba9b3a8b2e86d1045cac60bdb1deed\transformed\lifecycle-livedata-2.7.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\2b260b30ef0a58b49664551b245f18f6\transformed\jetified-lifecycle-livedata-core-ktx-2.7.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\b0657b0970d0866183b7530c4c2af9b9\transformed\jetified-lifecycle-viewmodel-ktx-2.7.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\79db7ac08345609d8003455a2797fcb7\transformed\jetified-lifecycle-runtime-ktx-2.7.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\b71f06692ae4f84642101bc2ac1f8ec2\transformed\lifecycle-livedata-core-2.7.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\3c0603bc0583d16375f03a8bc6578f07\transformed\lifecycle-viewmodel-2.7.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\6753378db7a3288a69ac709313d9f37d\transformed\lifecycle-runtime-2.7.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\c1b7a2458ffc4e8950530c27f28b21e4\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\1864317f4194bcc3489a9882383609ec\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\4c9bb7034ba484402c648549a731b829\transformed\jetified-lifecycle-viewmodel-savedstate-2.7.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\f3e0944d8d799a4b362ea58b81c6b41d\transformed\jetified-core-ktx-1.13.1\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\4c70f37de866d1bf5dbef58f2188908f\transformed\jetified-appcompat-resources-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\bf527d4b3ac87f0973eeafe76eb58c91\transformed\drawerlayout-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\aaa5985fcb718d4d9b03fb4213c6ae53\transformed\coordinatorlayout-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\d3a10098732c03667add312523d7a2e0\transformed\customview-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.transition:transition:1.4.1] C:\Users\farma\.gradle\caches\transforms-3\ffbd89e826b904ef24a1fdf90a9e080e\transformed\transition-1.4.1\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\f293a9030ed1f2f273ff6b6678d2a162\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\303f5f49ad5533f3993a79cf749572e5\transformed\vectordrawable-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\823c5f689ca6667423d6fb31c1a848fd\transformed\swiperefreshlayout-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\93b853672d532bf4c56cefa56e4c0a75\transformed\asynclayoutinflater-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] C:\Users\farma\.gradle\caches\transforms-3\7ff8dfb41d12503c2513cee3c5d3838b\transformed\jetified-security-crypto-1.1.0-alpha06\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] C:\Users\farma\.gradle\caches\transforms-3\0e63111edc662fd19ccb4e4b7cdd7eb6\transformed\exifinterface-1.3.7\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\862a878762e6e9e948ef5b43f04300c3\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\1e01ccf7a51515aeea5e1eb68a0a98bb\transformed\jetified-tracing-1.2.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\409256ed23ba001d948c62172f8e79b0\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\404d33d99b6dace56e82f86c2537a1fb\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\d117833f46e155f6d0be16c65dbf899a\transformed\jetified-datastore-core-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\a62fdc3dfcc43ac8bdbf6ac44381b2fc\transformed\jetified-datastore-preferences-release\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.datastore:datastore-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\7c0c78fea82c168f6fc3aeaa45ee737b\transformed\jetified-datastore-release\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\farma\.gradle\caches\transforms-3\258a0dc1b4c58d9506df639f898d9b27\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\5aa730a9e738f0e6e7d44753163571b5\transformed\cursoradapter-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.window.extensions.core:core:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\875958f70d08175b953f6a25fe693c08\transformed\jetified-core-1.0.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.documentfile:documentfile:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\4d5aacea5b78b258fb7ba60a31d6a0c7\transformed\documentfile-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\64ff01d2f37046c6b4bf018c83b9196e\transformed\localbroadcastmanager-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\8681e09ba1ca162850f7381a6a34de49\transformed\print-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\farma\.gradle\caches\transforms-3\ef9beedc99eb6f3432fda593c3dfca94\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:2:1-7:12
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] C:\Users\farma\.gradle\caches\transforms-3\05c9aaa97c8ffdb3ecc9aad2eec13c84\transformed\jetified-relinker-1.4.5\AndroidManifest.xml:2:1-7:12
+	package
+		INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+	android:versionName
+		INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+	android:versionCode
+		INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:1:11-69
+uses-permission#android.permission.INTERNET
+ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:3:5-66
+MERGED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:3:5-66
+MERGED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:3:5-66
+	android:name
+		ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:3:22-64
+queries
+ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:43:5-48:15
+intent#action:name:android.intent.action.PROCESS_TEXT+data:mimeType:text/plain
+ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:44:9-47:18
+action#android.intent.action.PROCESS_TEXT
+ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:45:13-72
+	android:name
+		ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:45:21-70
+data
+ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:46:13-50
+	android:mimeType
+		ADDED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\main\AndroidManifest.xml:46:19-48
+uses-sdk
+INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+MERGED from [:shared_preferences_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\shared_preferences_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:shared_preferences_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\shared_preferences_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:6:5-44
+MERGED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:6:5-44
+MERGED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:connectivity_plus] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\connectivity_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:connectivity_plus] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\connectivity_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:flutter_plugin_android_lifecycle] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:flutter_plugin_android_lifecycle] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:flutter_secure_storage] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\flutter_secure_storage\intermediates\merged_manifest\debug\AndroidManifest.xml:6:5-8:53
+MERGED from [:flutter_secure_storage] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\flutter_secure_storage\intermediates\merged_manifest\debug\AndroidManifest.xml:6:5-8:53
+MERGED from [:path_provider_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:sqflite_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\sqflite_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:sqflite_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\sqflite_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [androidx.preference:preference:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\88a717a1155d369bee0ca40c5055059f\transformed\preference-1.2.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.preference:preference:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\88a717a1155d369bee0ca40c5055059f\transformed\preference-1.2.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\fc86d529c8262d5247b0c7d42de1f86f\transformed\appcompat-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\fc86d529c8262d5247b0c7d42de1f86f\transformed\appcompat-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] C:\Users\farma\.gradle\caches\transforms-3\aad290cbdc0b81fa8322451e13ac9dcd\transformed\jetified-fragment-ktx-1.7.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] C:\Users\farma\.gradle\caches\transforms-3\aad290cbdc0b81fa8322451e13ac9dcd\transformed\jetified-fragment-ktx-1.7.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\farma\.gradle\caches\transforms-3\307aa7cf29848b32468d9bb64a398db3\transformed\fragment-1.7.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment:1.7.1] C:\Users\farma\.gradle\caches\transforms-3\307aa7cf29848b32468d9bb64a398db3\transformed\fragment-1.7.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-ktx:1.9.3] C:\Users\farma\.gradle\caches\transforms-3\54e66e7dcbe5714281995486bbadeed8\transformed\jetified-activity-ktx-1.9.3\AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-ktx:1.9.3] C:\Users\farma\.gradle\caches\transforms-3\54e66e7dcbe5714281995486bbadeed8\transformed\jetified-activity-ktx-1.9.3\AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity:1.9.3] C:\Users\farma\.gradle\caches\transforms-3\9be994f55c6dbb1a4a767c5d2117ea3d\transformed\jetified-activity-1.9.3\AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.9.3] C:\Users\farma\.gradle\caches\transforms-3\9be994f55c6dbb1a4a767c5d2117ea3d\transformed\jetified-activity-1.9.3\AndroidManifest.xml:20:5-44
+MERGED from [androidx.browser:browser:1.8.0] C:\Users\farma\.gradle\caches\transforms-3\b75befc56af4d595501b01a6382b1c71\transformed\browser-1.8.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.browser:browser:1.8.0] C:\Users\farma\.gradle\caches\transforms-3\b75befc56af4d595501b01a6382b1c71\transformed\browser-1.8.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\7436818421ce034d6df82e3bf5baac61\transformed\recyclerview-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\7436818421ce034d6df82e3bf5baac61\transformed\recyclerview-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\1c9310f778d53788f6e0f5d781d0fcbb\transformed\legacy-support-core-ui-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\1c9310f778d53788f6e0f5d781d0fcbb\transformed\legacy-support-core-ui-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\66100374523b1f03b4a7887219144572\transformed\slidingpanelayout-1.2.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\66100374523b1f03b4a7887219144572\transformed\slidingpanelayout-1.2.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.window:window-java:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\7b23248398381714ee3ae780e5705ed5\transformed\jetified-window-java-1.2.0\AndroidManifest.xml:19:5-44
+MERGED from [androidx.window:window-java:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\7b23248398381714ee3ae780e5705ed5\transformed\jetified-window-java-1.2.0\AndroidManifest.xml:19:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\b37b7164471816d532419c0191be2be7\transformed\legacy-support-core-utils-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\b37b7164471816d532419c0191be2be7\transformed\legacy-support-core-utils-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\c352d8da7edc3677fabc8dedcb5ae1d0\transformed\loader-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\c352d8da7edc3677fabc8dedcb5ae1d0\transformed\loader-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\0c9e0193023c40e4169839e21f4ccd75\transformed\viewpager-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\0c9e0193023c40e4169839e21f4ccd75\transformed\viewpager-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abba9b3a8b2e86d1045cac60bdb1deed\transformed\lifecycle-livedata-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abba9b3a8b2e86d1045cac60bdb1deed\transformed\lifecycle-livedata-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\2b260b30ef0a58b49664551b245f18f6\transformed\jetified-lifecycle-livedata-core-ktx-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\2b260b30ef0a58b49664551b245f18f6\transformed\jetified-lifecycle-livedata-core-ktx-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\b0657b0970d0866183b7530c4c2af9b9\transformed\jetified-lifecycle-viewmodel-ktx-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\b0657b0970d0866183b7530c4c2af9b9\transformed\jetified-lifecycle-viewmodel-ktx-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\79db7ac08345609d8003455a2797fcb7\transformed\jetified-lifecycle-runtime-ktx-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\79db7ac08345609d8003455a2797fcb7\transformed\jetified-lifecycle-runtime-ktx-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\b71f06692ae4f84642101bc2ac1f8ec2\transformed\lifecycle-livedata-core-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\b71f06692ae4f84642101bc2ac1f8ec2\transformed\lifecycle-livedata-core-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\3c0603bc0583d16375f03a8bc6578f07\transformed\lifecycle-viewmodel-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\3c0603bc0583d16375f03a8bc6578f07\transformed\lifecycle-viewmodel-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\6753378db7a3288a69ac709313d9f37d\transformed\lifecycle-runtime-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\6753378db7a3288a69ac709313d9f37d\transformed\lifecycle-runtime-2.7.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:21:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\c1b7a2458ffc4e8950530c27f28b21e4\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\c1b7a2458ffc4e8950530c27f28b21e4\transformed\jetified-savedstate-ktx-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\1864317f4194bcc3489a9882383609ec\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] C:\Users\farma\.gradle\caches\transforms-3\1864317f4194bcc3489a9882383609ec\transformed\jetified-savedstate-1.2.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\4c9bb7034ba484402c648549a731b829\transformed\jetified-lifecycle-viewmodel-savedstate-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\4c9bb7034ba484402c648549a731b829\transformed\jetified-lifecycle-viewmodel-savedstate-2.7.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\f3e0944d8d799a4b362ea58b81c6b41d\transformed\jetified-core-ktx-1.13.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\f3e0944d8d799a4b362ea58b81c6b41d\transformed\jetified-core-ktx-1.13.1\AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\4c70f37de866d1bf5dbef58f2188908f\transformed\jetified-appcompat-resources-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\4c70f37de866d1bf5dbef58f2188908f\transformed\jetified-appcompat-resources-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\bf527d4b3ac87f0973eeafe76eb58c91\transformed\drawerlayout-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\bf527d4b3ac87f0973eeafe76eb58c91\transformed\drawerlayout-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\aaa5985fcb718d4d9b03fb4213c6ae53\transformed\coordinatorlayout-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\aaa5985fcb718d4d9b03fb4213c6ae53\transformed\coordinatorlayout-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\d3a10098732c03667add312523d7a2e0\transformed\customview-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\d3a10098732c03667add312523d7a2e0\transformed\customview-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.4.1] C:\Users\farma\.gradle\caches\transforms-3\ffbd89e826b904ef24a1fdf90a9e080e\transformed\transition-1.4.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.4.1] C:\Users\farma\.gradle\caches\transforms-3\ffbd89e826b904ef24a1fdf90a9e080e\transformed\transition-1.4.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\f293a9030ed1f2f273ff6b6678d2a162\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\f293a9030ed1f2f273ff6b6678d2a162\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\303f5f49ad5533f3993a79cf749572e5\transformed\vectordrawable-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] C:\Users\farma\.gradle\caches\transforms-3\303f5f49ad5533f3993a79cf749572e5\transformed\vectordrawable-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\823c5f689ca6667423d6fb31c1a848fd\transformed\swiperefreshlayout-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\823c5f689ca6667423d6fb31c1a848fd\transformed\swiperefreshlayout-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\93b853672d532bf4c56cefa56e4c0a75\transformed\asynclayoutinflater-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\93b853672d532bf4c56cefa56e4c0a75\transformed\asynclayoutinflater-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] C:\Users\farma\.gradle\caches\transforms-3\7ff8dfb41d12503c2513cee3c5d3838b\transformed\jetified-security-crypto-1.1.0-alpha06\AndroidManifest.xml:20:5-44
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] C:\Users\farma\.gradle\caches\transforms-3\7ff8dfb41d12503c2513cee3c5d3838b\transformed\jetified-security-crypto-1.1.0-alpha06\AndroidManifest.xml:20:5-44
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] C:\Users\farma\.gradle\caches\transforms-3\0e63111edc662fd19ccb4e4b7cdd7eb6\transformed\exifinterface-1.3.7\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] C:\Users\farma\.gradle\caches\transforms-3\0e63111edc662fd19ccb4e4b7cdd7eb6\transformed\exifinterface-1.3.7\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:21:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\862a878762e6e9e948ef5b43f04300c3\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\862a878762e6e9e948ef5b43f04300c3\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\1e01ccf7a51515aeea5e1eb68a0a98bb\transformed\jetified-tracing-1.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.tracing:tracing:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\1e01ccf7a51515aeea5e1eb68a0a98bb\transformed\jetified-tracing-1.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\409256ed23ba001d948c62172f8e79b0\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\409256ed23ba001d948c62172f8e79b0\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\404d33d99b6dace56e82f86c2537a1fb\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\404d33d99b6dace56e82f86c2537a1fb\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\d117833f46e155f6d0be16c65dbf899a\transformed\jetified-datastore-core-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\d117833f46e155f6d0be16c65dbf899a\transformed\jetified-datastore-core-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\a62fdc3dfcc43ac8bdbf6ac44381b2fc\transformed\jetified-datastore-preferences-release\AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\a62fdc3dfcc43ac8bdbf6ac44381b2fc\transformed\jetified-datastore-preferences-release\AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\7c0c78fea82c168f6fc3aeaa45ee737b\transformed\jetified-datastore-release\AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-android:1.1.3] C:\Users\farma\.gradle\caches\transforms-3\7c0c78fea82c168f6fc3aeaa45ee737b\transformed\jetified-datastore-release\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\farma\.gradle\caches\transforms-3\258a0dc1b4c58d9506df639f898d9b27\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\farma\.gradle\caches\transforms-3\258a0dc1b4c58d9506df639f898d9b27\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\5aa730a9e738f0e6e7d44753163571b5\transformed\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\5aa730a9e738f0e6e7d44753163571b5\transformed\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.window.extensions.core:core:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\875958f70d08175b953f6a25fe693c08\transformed\jetified-core-1.0.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.window.extensions.core:core:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\875958f70d08175b953f6a25fe693c08\transformed\jetified-core-1.0.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\4d5aacea5b78b258fb7ba60a31d6a0c7\transformed\documentfile-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\4d5aacea5b78b258fb7ba60a31d6a0c7\transformed\documentfile-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\64ff01d2f37046c6b4bf018c83b9196e\transformed\localbroadcastmanager-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\64ff01d2f37046c6b4bf018c83b9196e\transformed\localbroadcastmanager-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\8681e09ba1ca162850f7381a6a34de49\transformed\print-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] C:\Users\farma\.gradle\caches\transforms-3\8681e09ba1ca162850f7381a6a34de49\transformed\print-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\farma\.gradle\caches\transforms-3\ef9beedc99eb6f3432fda593c3dfca94\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\farma\.gradle\caches\transforms-3\ef9beedc99eb6f3432fda593c3dfca94\transformed\jetified-annotation-experimental-1.4.0\AndroidManifest.xml:5:5-44
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] C:\Users\farma\.gradle\caches\transforms-3\05c9aaa97c8ffdb3ecc9aad2eec13c84\transformed\jetified-relinker-1.4.5\AndroidManifest.xml:5:5-43
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] C:\Users\farma\.gradle\caches\transforms-3\05c9aaa97c8ffdb3ecc9aad2eec13c84\transformed\jetified-relinker-1.4.5\AndroidManifest.xml:5:5-43
+	tools:overrideLibrary
+		ADDED from [:flutter_secure_storage] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\flutter_secure_storage\intermediates\merged_manifest\debug\AndroidManifest.xml:8:9-50
+	android:targetSdkVersion
+		INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\android\app\src\debug\AndroidManifest.xml
+provider#io.flutter.plugins.imagepicker.ImagePickerFileProvider
+ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:9:9-17:20
+	android:grantUriPermissions
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:13:13-47
+	android:authorities
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-74
+	android:exported
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:12:13-37
+	android:name
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:10:13-82
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:14:13-16:75
+	android:resource
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:16:17-72
+	android:name
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:15:17-67
+service#com.google.android.gms.metadata.ModuleDependencies
+ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:19:9-31:19
+	android:enabled
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:21:13-36
+	android:exported
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:22:13-37
+	tools:ignore
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:23:13-40
+	android:name
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:20:13-78
+intent-filter#action:name:com.google.android.gms.metadata.MODULE_DEPENDENCIES
+ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:24:13-26:29
+action#com.google.android.gms.metadata.MODULE_DEPENDENCIES
+ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:25:17-94
+	android:name
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:25:25-91
+meta-data#photopicker_activity:0:required
+ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:28:13-30:36
+	android:value
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:30:17-33
+	android:name
+		ADDED from [:image_picker_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:29:17-63
+activity#io.flutter.plugins.urllauncher.WebViewActivity
+ADDED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:8:9-11:74
+	android:exported
+		ADDED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:10:13-37
+	android:theme
+		ADDED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-71
+	android:name
+		ADDED from [:url_launcher_android] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:9:13-74
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from [:connectivity_plus] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\connectivity_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:7:5-79
+	android:name
+		ADDED from [:connectivity_plus] C:\Users\farma\OneDrive\Documents\sparehub\sparehubapps\build\connectivity_plus\intermediates\merged_manifest\debug\AndroidManifest.xml:7:22-76
+uses-library#androidx.window.extensions
+ADDED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:23:9-25:40
+	android:required
+		ADDED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:25:13-37
+	android:name
+		ADDED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:24:13-54
+uses-library#androidx.window.sidecar
+ADDED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:26:9-28:40
+	android:required
+		ADDED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:28:13-37
+	android:name
+		ADDED from [androidx.window:window:1.2.0] C:\Users\farma\.gradle\caches\transforms-3\58702fea9cb6c5f6622f8674ed826b25\transformed\jetified-window-1.2.0\AndroidManifest.xml:27:13-51
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\862a878762e6e9e948ef5b43f04300c3\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\farma\.gradle\caches\transforms-3\862a878762e6e9e948ef5b43f04300c3\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:28:13-31
+	android:authorities
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:26:13-68
+	android:exported
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:27:13-37
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:25:13-67
+meta-data#androidx.lifecycle.ProcessLifecycleInitializer
+ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\farma\.gradle\caches\transforms-3\abc204f8a83328bed38122fa948ec11a\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:30:17-78
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
+permission#com.example.lokmela.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
+uses-permission#com.example.lokmela.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.13.1] C:\Users\farma\.gradle\caches\transforms-3\15d9867c42d823665c9dfc11b69afeaf\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\farma\.gradle\caches\transforms-3\302cddce49bce42babec01c75aee2591\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:25-92

@@ -1,0 +1,2 @@
+C:/Users/farma/OneDrive/Desktop/sparehubapps/android/app/.cxx/Debug/3r603j83/x86/CMakeFiles/edit_cache.dir
+C:/Users/farma/OneDrive/Desktop/sparehubapps/android/app/.cxx/Debug/3r603j83/x86/CMakeFiles/rebuild_cache.dir

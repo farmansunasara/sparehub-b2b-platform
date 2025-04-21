@@ -1,0 +1,1 @@
+ C:\\Users\\farma\\OneDrive\\Documents\\sparehubapps\\.dart_tool\\flutter_build\\becc7944b7651b3c4fc517de2fd7ab9f\\native_assets.json: 
