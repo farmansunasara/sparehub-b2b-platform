@@ -11,6 +11,8 @@ import '../models/category.dart';
 import '../models/subcategory.dart';
 import '../models/car.dart';
 import 'auth_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ManufacturerProvider with ChangeNotifier {
   final ApiService _apiService;
@@ -74,50 +76,97 @@ class ManufacturerProvider with ChangeNotifier {
   Future<void> addProduct({
     required Product product,
     required List<File> images,
-    File? technicalSpecificationPdf,  // Added PDF parameter
+    File? technicalSpecificationPdf,
+    File? installationGuidePdf,
   }) async {
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
 
-      // Upload PDF if provided
-      String? pdfUrl;
-      if (technicalSpecificationPdf != null) {
-        final bytes = await technicalSpecificationPdf.readAsBytes();
-        final filename = technicalSpecificationPdf.path.split('/').last;
-        pdfUrl = await _apiService.uploadFile(
-          bytes,
-          filename,
-          'application/pdf',
-        );
+      // Prepare product data
+      final productData = product.toJson();
+      print('Product Data: $productData');
+      // Validate and log compatible_car_ids
+      final compatibleCarIds = productData['compatible_car_ids'] as List<dynamic>? ?? [];
+      print('Compatible Car IDs: $compatibleCarIds');
+      for (var id in compatibleCarIds) {
+        if (id is! int) {
+          throw Exception('Invalid compatible_car_id: $id is not an integer');
+        }
       }
 
-      // Upload images
-      final imageUrls = await Future.wait(
-        images.map((file) async {
-          final bytes = await file.readAsBytes();
-          final filename = file.path.split('/').last;
-          return _apiService.uploadFile(
-            bytes,
-            filename,
-            'image/${filename.split('.').last}',
-          );
-        }),
+      print('Images: ${images.map((file) => file.path).toList()}');
+      print('Technical PDF: ${technicalSpecificationPdf?.path}');
+      print('Installation PDF: ${installationGuidePdf?.path}');
+
+      // Create multipart request
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiService.baseUrl}/products/'),
       );
 
-      // Create product with uploaded files
-      final productToCreate = product.copyWith(
-        images: imageUrls,
-        technicalSpecificationPdf: pdfUrl,  // Add PDF URL to product
-      );
+      // Add product fields
+      productData.forEach((key, value) {
+        if (value != null) {
+          if (value is List) {
+            request.fields[key] = json.encode(value);
+          } else {
+            request.fields[key] = value.toString();
+          }
+        }
+      });
 
-      final response = await _apiService.createProduct(productToCreate.toJson());
+      // Add images
+      for (var image in images) {
+        final stream = http.ByteStream(image.openRead());
+        final length = await image.length();
+        final multipartFile = http.MultipartFile(
+          'images',
+          stream,
+          length,
+          filename: image.path.split('/').last,
+        );
+        request.files.add(multipartFile);
+      }
+
+      // Add PDFs
+      if (technicalSpecificationPdf != null) {
+        final stream = http.ByteStream(technicalSpecificationPdf.openRead());
+        final length = await technicalSpecificationPdf.length();
+        final multipartFile = http.MultipartFile(
+          'technical_specification_pdf',
+          stream,
+          length,
+          filename: technicalSpecificationPdf.path.split('/').last,
+        );
+        request.files.add(multipartFile);
+      }
+
+      if (installationGuidePdf != null) {
+        final stream = http.ByteStream(installationGuidePdf.openRead());
+        final length = await installationGuidePdf.length();
+        final multipartFile = http.MultipartFile(
+          'installation_guide_pdf',
+          stream,
+          length,
+          filename: installationGuidePdf.path.split('/').last,
+        );
+        request.files.add(multipartFile);
+      }
+
+      // Send request using ApiService
+      final response = await _apiService.sendMultipartRequest(request);
+
       final newProduct = Product.fromJson(response);
       _products.add(newProduct);
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error adding product: $e');
+      if (e is ApiException && e.statusCode == 401) {
+        _error = 'Authentication failed. Please log in again.';
+      }
       notifyListeners();
       rethrow;
     } finally {
@@ -141,6 +190,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error updating product: $e');
       notifyListeners();
       rethrow;
     } finally {
@@ -170,6 +220,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error updating product stock: $e');
       notifyListeners();
       rethrow;
     } finally {
@@ -196,6 +247,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error updating order status: $e');
       notifyListeners();
       rethrow;
     } finally {
@@ -215,6 +267,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error deleting product: $e');
       notifyListeners();
       rethrow;
     } finally {
@@ -233,7 +286,7 @@ class ManufacturerProvider with ChangeNotifier {
   Future<void> refreshOrders() => _fetchOrders();
   Future<void> refreshBrands() => _fetchBrands();
   Future<void> refreshCategories() => _fetchCategories();
-  Future<void> refreshSubcategories() => _fetchSubcategories();
+  Future<void> refreshSubcategories({int? categoryId}) => _fetchSubcategories(categoryId: categoryId);
   Future<void> refreshCars() => _fetchCars();
 
   // Private fetch methods
@@ -244,7 +297,7 @@ class ManufacturerProvider with ChangeNotifier {
       _fetchSubcategories(),
       _fetchCars(),
       _fetchProducts(),
-      _fetchOrders(),
+      // _fetchOrders(), // Commented out to avoid 404 error
     ]);
   }
 
@@ -259,6 +312,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error fetching brands: $e');
       notifyListeners();
     } finally {
       _isLoading = false;
@@ -277,6 +331,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error fetching categories: $e');
       notifyListeners();
     } finally {
       _isLoading = false;
@@ -284,17 +339,18 @@ class ManufacturerProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _fetchSubcategories() async {
+  Future<void> _fetchSubcategories({int? categoryId}) async {
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
 
-      final subcategoriesData = await _apiService.getSubcategories();
+      final subcategoriesData = await _apiService.getSubcategories(categoryId: categoryId);
       _subcategories = subcategoriesData.map((json) => Subcategory.fromJson(json)).toList();
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error fetching subcategories: $e');
       notifyListeners();
     } finally {
       _isLoading = false;
@@ -313,6 +369,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error fetching cars: $e');
       notifyListeners();
     } finally {
       _isLoading = false;
@@ -331,6 +388,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error fetching products: $e');
       notifyListeners();
     } finally {
       _isLoading = false;
@@ -349,6 +407,7 @@ class ManufacturerProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = e.toString();
+      print('Error fetching orders: $e');
       notifyListeners();
     } finally {
       _isLoading = false;

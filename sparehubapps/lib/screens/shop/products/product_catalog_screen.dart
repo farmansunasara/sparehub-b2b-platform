@@ -163,11 +163,12 @@ class _ProductCatalogScreenState extends State<ProductCatalogScreen> {
                   );
                 }
 
-                final products = provider.products;
+                // Filter products to show only approved ones
+                final products = provider.products.where((p) => p.isApproved).toList();
 
                 if (products.isEmpty) {
                   return const EmptyStateView(
-                    message: 'No products found',
+                    message: 'No approved products found',
                     icon: Icons.inventory_2_outlined,
                   );
                 }
@@ -256,125 +257,170 @@ class _ProductGridItem extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            // Product Image
-            AspectRatio(
-              aspectRatio: 1,
-              child: product.images.isNotEmpty
-                  ? Image.network(
-                      product.images.first,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[200],
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 32,
-                            color: Colors.grey[400],
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      color: Colors.grey[200],
-                      child: Icon(
-                        Icons.inventory_2_outlined,
-                        size: 32,
-                        color: Colors.grey[400],
-                      ),
-                    ),
-            ),
-
-            // Product Info
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: product.images.isNotEmpty
+                      ? Image.network(
+                    product.images.first,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[200],
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 32,
+                          color: Colors.grey[400],
+                        ),
+                      );
+                    },
+                  )
+                      : Container(
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      size: 32,
+                      color: Colors.grey[400],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+
+                // Product Info
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Text(
+                        product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            product.formattedPrice,
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (product.discount > 0) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              product.formattedDiscountedPrice,
-                              style: const TextStyle(
-                                decoration: TextDecoration.lineThrough,
-                                color: Colors.grey,
-                                fontSize: 12,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product.formattedPrice,
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
+                              if (product.discount > 0) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  product.formattedDiscountedPrice,
+                                  style: const TextStyle(
+                                    decoration: TextDecoration.lineThrough,
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          Consumer<CartProvider>(
+                            builder: (context, cartProvider, child) {
+                              final inCart = cartProvider.hasProduct(product.id!);
+                              return IconButton(
+                                icon: Icon(
+                                  inCart ? Icons.shopping_cart : Icons.add_shopping_cart,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                onPressed: product.isOutOfStock || !product.isApproved
+                                    ? null
+                                    : () async {
+                                  try {
+                                    if (inCart) {
+                                      Navigator.pushNamed(context, '/shop/cart');
+                                    } else {
+                                      await cartProvider.addItem(
+                                        product,
+                                        quantity: product.minOrderQuantity,
+                                      );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: const Text('Added to cart'),
+                                            action: SnackBarAction(
+                                              label: 'View Cart',
+                                              onPressed: () {
+                                                Navigator.pushNamed(context, '/shop/cart');
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(e.toString()),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                              );
+                            },
+                          ),
                         ],
                       ),
-                      Consumer<CartProvider>(
-                        builder: (context, cartProvider, child) {
-                          final inCart = cartProvider.hasProduct(product.id!);
-                          return IconButton(
-                            icon: Icon(
-                              inCart ? Icons.shopping_cart : Icons.add_shopping_cart,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            onPressed: () async {
-                              try {
-                                if (inCart) {
-                                  Navigator.pushNamed(context, '/shop/cart');
-                                } else {
-                                  await cartProvider.addItem(product);
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: const Text('Added to cart'),
-                                        action: SnackBarAction(
-                                          label: 'View Cart',
-                                          onPressed: () {
-                                            Navigator.pushNamed(context, '/shop/cart');
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(e.toString()),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                          );
-                        },
+                      const SizedBox(height: 4),
+                      Text(
+                        product.isOutOfStock
+                            ? 'Out of Stock'
+                            : product.isLowStock
+                            ? 'Low Stock'
+                            : 'In Stock: ${product.stockQuantity}',
+                        style: TextStyle(
+                          color: product.isOutOfStock
+                              ? Colors.red
+                              : product.isLowStock
+                              ? Colors.orange
+                              : Colors.green,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+            if (product.isFeatured)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'Featured',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -398,137 +444,182 @@ class _ProductListItem extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Row(
+        child: Stack(
           children: [
-            // Product Image
-            SizedBox(
-              width: 120,
-              height: 120,
-              child: product.images.isNotEmpty
-                  ? Image.network(
-                      product.images.first,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[200],
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 32,
-                            color: Colors.grey[400],
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      color: Colors.grey[200],
-                      child: Icon(
-                        Icons.inventory_2_outlined,
-                        size: 32,
-                        color: Colors.grey[400],
-                      ),
+            Row(
+              children: [
+                // Product Image
+                SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: product.images.isNotEmpty
+                      ? Image.network(
+                    product.images.first,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[200],
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 32,
+                          color: Colors.grey[400],
+                        ),
+                      );
+                    },
+                  )
+                      : Container(
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      size: 32,
+                      color: Colors.grey[400],
                     ),
-            ),
+                  ),
+                ),
 
-            // Product Info
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Product Info
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Text(
+                          product.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              product.formattedPrice,
-                              style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            if (product.discount > 0) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                product.formattedDiscountedPrice,
-                                style: const TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.grey,
-                                  fontSize: 12,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product.formattedPrice,
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
+                                if (product.discount > 0) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    product.formattedDiscountedPrice,
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            Consumer<CartProvider>(
+                              builder: (context, cartProvider, child) {
+                                final inCart = cartProvider.hasProduct(product.id!);
+                                return IconButton(
+                                  icon: Icon(
+                                    inCart ? Icons.shopping_cart : Icons.add_shopping_cart,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  onPressed: product.isOutOfStock || !product.isApproved
+                                      ? null
+                                      : () async {
+                                    try {
+                                      if (inCart) {
+                                        Navigator.pushNamed(context, '/shop/cart');
+                                      } else {
+                                        await cartProvider.addItem(
+                                          product,
+                                          quantity: product.minOrderQuantity,
+                                        );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: const Text('Added to cart'),
+                                              action: SnackBarAction(
+                                                label: 'View Cart',
+                                                onPressed: () {
+                                                  Navigator.pushNamed(context, '/shop/cart');
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(e.toString()),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                );
+                              },
+                            ),
                           ],
                         ),
-                        Consumer<CartProvider>(
-                          builder: (context, cartProvider, child) {
-                            final inCart = cartProvider.hasProduct(product.id!);
-                            return IconButton(
-                              icon: Icon(
-                                inCart ? Icons.shopping_cart : Icons.add_shopping_cart,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              onPressed: () async {
-                                try {
-                                  if (inCart) {
-                                    Navigator.pushNamed(context, '/shop/cart');
-                                  } else {
-                                    await cartProvider.addItem(product);
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: const Text('Added to cart'),
-                                          action: SnackBarAction(
-                                            label: 'View Cart',
-                                            onPressed: () {
-                                              Navigator.pushNamed(context, '/shop/cart');
-                                            },
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(e.toString()),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                            );
-                          },
+                        const SizedBox(height: 8),
+                        Text(
+                          'Material: ${product.formattedMaterial} | Color: ${product.formattedColor}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product.isOutOfStock
+                              ? 'Out of Stock'
+                              : product.isLowStock
+                              ? 'Low Stock'
+                              : 'In Stock: ${product.stockQuantity}',
+                          style: TextStyle(
+                            color: product.isOutOfStock
+                                ? Colors.red
+                                : product.isLowStock
+                                ? Colors.orange
+                                : Colors.green,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      product.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+                  ),
+                ),
+              ],
+            ),
+            if (product.isFeatured)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'Featured',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

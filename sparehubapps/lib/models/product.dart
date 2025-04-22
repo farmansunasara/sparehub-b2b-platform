@@ -1,28 +1,33 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show listEquals, mapEquals;
+import 'package:flutter/foundation.dart' show listEquals;
 
 class Product {
   final String? id;
   final String name;
   final String description;
   final String sku;
-  final String? modelNumber;
   final int? brandId;
   final int categoryId;
   final int subcategoryId;
   final int manufacturerId;
   final List<int> compatibleCarIds;
-  final List<String> categories;
   final double price;
   final double discount;
   final int stockQuantity;
   final int minOrderQuantity;
-  final Map<String, dynamic> specifications;
-  final String? technicalSpecificationPdf;
+  final int? maxOrderQuantity;
   final double weight;
   final String? dimensions;
+  final String? material;
+  final String? color;
+  final String? technicalSpecificationPdf;
+  final String? installationGuidePdf;
   final double shippingCost;
+  final String? shippingTime;
+  final String? originCountry;
   final bool isActive;
+  final bool isFeatured;
+  final bool isApproved;
   final List<String> images;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -32,23 +37,28 @@ class Product {
     required this.name,
     required this.description,
     required this.sku,
-    this.modelNumber,
     this.brandId,
     required this.categoryId,
     required this.subcategoryId,
     required this.manufacturerId,
     required this.compatibleCarIds,
-    this.categories = const [],
     required this.price,
     this.discount = 0.0,
     required this.stockQuantity,
     this.minOrderQuantity = 1,
-    this.specifications = const {},
-    this.technicalSpecificationPdf,
+    this.maxOrderQuantity,
     required this.weight,
     this.dimensions,
+    this.material,
+    this.color,
+    this.technicalSpecificationPdf,
+    this.installationGuidePdf,
     this.shippingCost = 0.0,
+    this.shippingTime,
+    this.originCountry,
     this.isActive = true,
+    this.isFeatured = false,
+    this.isApproved = false,
     this.images = const [],
     this.createdAt,
     this.updatedAt,
@@ -59,23 +69,28 @@ class Product {
     String? name,
     String? description,
     String? sku,
-    String? modelNumber,
     int? brandId,
     int? categoryId,
     int? subcategoryId,
     int? manufacturerId,
     List<int>? compatibleCarIds,
-    List<String>? categories,
     double? price,
     double? discount,
     int? stockQuantity,
     int? minOrderQuantity,
-    Map<String, dynamic>? specifications,
-    String? technicalSpecificationPdf,
+    int? maxOrderQuantity,
     double? weight,
     String? dimensions,
+    String? material,
+    String? color,
+    String? technicalSpecificationPdf,
+    String? installationGuidePdf,
     double? shippingCost,
+    String? shippingTime,
+    String? originCountry,
     bool? isActive,
+    bool? isFeatured,
+    bool? isApproved,
     List<String>? images,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -85,23 +100,28 @@ class Product {
       name: name ?? this.name,
       description: description ?? this.description,
       sku: sku ?? this.sku,
-      modelNumber: modelNumber ?? this.modelNumber,
       brandId: brandId ?? this.brandId,
       categoryId: categoryId ?? this.categoryId,
       subcategoryId: subcategoryId ?? this.subcategoryId,
       manufacturerId: manufacturerId ?? this.manufacturerId,
       compatibleCarIds: compatibleCarIds ?? this.compatibleCarIds,
-      categories: categories ?? this.categories,
       price: price ?? this.price,
       discount: discount ?? this.discount,
       stockQuantity: stockQuantity ?? this.stockQuantity,
       minOrderQuantity: minOrderQuantity ?? this.minOrderQuantity,
-      specifications: specifications ?? this.specifications,
-      technicalSpecificationPdf: technicalSpecificationPdf ?? this.technicalSpecificationPdf,
+      maxOrderQuantity: maxOrderQuantity ?? this.maxOrderQuantity,
       weight: weight ?? this.weight,
       dimensions: dimensions ?? this.dimensions,
+      material: material ?? this.material,
+      color: color ?? this.color,
+      technicalSpecificationPdf: technicalSpecificationPdf ?? this.technicalSpecificationPdf,
+      installationGuidePdf: installationGuidePdf ?? this.installationGuidePdf,
       shippingCost: shippingCost ?? this.shippingCost,
+      shippingTime: shippingTime ?? this.shippingTime,
+      originCountry: originCountry ?? this.originCountry,
       isActive: isActive ?? this.isActive,
+      isFeatured: isFeatured ?? this.isFeatured,
+      isApproved: isApproved ?? this.isApproved,
       images: images ?? this.images,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -114,23 +134,28 @@ class Product {
       'name': name,
       'description': description,
       'sku': sku,
-      'model_number': modelNumber,
-      'brand': brandId,
-      'category': categoryId,
-      'subcategory': subcategoryId,
+      'brand_id': brandId,
+      'category_id': categoryId,
+      'subcategory_id': subcategoryId,
       'manufacturer': manufacturerId,
-      'compatible_cars': compatibleCarIds,
-      'categories': categories,
+      'compatible_car_ids': compatibleCarIds,
       'price': price,
       'discount': discount,
-      'stock': stockQuantity,
+      'stock_quantity': stockQuantity,
       'min_order_quantity': minOrderQuantity,
-      'specifications': specifications,
-      'technical_specification_pdf': technicalSpecificationPdf,
+      'max_order_quantity': maxOrderQuantity,
       'weight': weight,
       'dimensions': dimensions,
+      'material': material,
+      'color': color,
+      'technical_specification_pdf': technicalSpecificationPdf,
+      'installation_guide_pdf': installationGuidePdf,
       'shipping_cost': shippingCost,
+      'shipping_time': shippingTime,
+      'origin_country': originCountry,
       'is_active': isActive,
+      'is_featured': isFeatured,
+      'is_approved': isApproved,
       'images': images,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
@@ -138,29 +163,61 @@ class Product {
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    print('Parsing product JSON: $json'); // Add logging for debugging
     return Product(
       id: json['id']?.toString(),
-      name: json['name'],
-      description: json['description'],
-      sku: json['sku'],
-      modelNumber: json['model_number'],
-      brandId: json['brand'],
-      categoryId: json['category'],
-      subcategoryId: json['subcategory'],
-      manufacturerId: json['manufacturer'],
-      compatibleCarIds: List<int>.from(json['compatible_cars'] ?? []),
-      categories: List<String>.from(json['categories'] ?? []),
-      price: (json['price'] as num).toDouble(),
-      discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
-      stockQuantity: json['stock'] ?? 0,
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      sku: json['sku'] ?? '',
+      brandId: json['brand'] != null ? json['brand']['id'] : null,
+      categoryId: json['category'] != null
+          ? json['category']['id'] ?? json['category_id']
+          : json['category_id'],
+      subcategoryId: json['subcategory'] != null
+          ? json['subcategory']['id'] ?? json['subcategory_id']
+          : json['subcategory_id'],
+      manufacturerId: json['manufacturer'] ?? 0,
+      compatibleCarIds: json['compatible_cars'] != null
+          ? List<int>.from(json['compatible_cars'].map((car) => car['id'] ?? 0))
+          : json['compatible_car_ids'] != null
+          ? List<int>.from(json['compatible_car_ids'])
+          : [],
+      price: json['price'] != null
+          ? (json['price'] is num
+          ? json['price'].toDouble()
+          : double.tryParse(json['price'].toString()) ?? 0.0)
+          : 0.0,
+      discount: json['discount'] != null
+          ? (json['discount'] is num
+          ? json['discount'].toDouble()
+          : double.tryParse(json['discount'].toString()) ?? 0.0)
+          : 0.0,
+      stockQuantity: json['stock_quantity'] ?? 0,
       minOrderQuantity: json['min_order_quantity'] ?? 1,
-      specifications: Map<String, dynamic>.from(json['specifications'] ?? {}),
-      technicalSpecificationPdf: json['technical_specification_pdf'],
-      weight: (json['weight'] as num).toDouble(),
+      maxOrderQuantity: json['max_order_quantity'],
+      weight: json['weight'] != null
+          ? (json['weight'] is num
+          ? json['weight'].toDouble()
+          : double.tryParse(json['weight'].toString()) ?? 0.0)
+          : 0.0,
       dimensions: json['dimensions'],
-      shippingCost: (json['shipping_cost'] as num?)?.toDouble() ?? 0.0,
+      material: json['material'],
+      color: json['color'],
+      technicalSpecificationPdf: json['technical_specification_pdf'],
+      installationGuidePdf: json['installation_guide_pdf'],
+      shippingCost: json['shipping_cost'] != null
+          ? (json['shipping_cost'] is num
+          ? json['shipping_cost'].toDouble()
+          : double.tryParse(json['shipping_cost'].toString()) ?? 0.0)
+          : 0.0,
+      shippingTime: json['shipping_time'],
+      originCountry: json['origin_country'],
       isActive: json['is_active'] ?? true,
-      images: List<String>.from(json['images'] ?? []),
+      isFeatured: json['is_featured'] ?? false,
+      isApproved: json['is_approved'] ?? false,
+      images: json['images'] != null
+          ? List<String>.from(json['images'].map((img) => img['image']?.toString() ?? ''))
+          : [],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
     );
@@ -181,23 +238,28 @@ class Product {
         other.name == name &&
         other.description == description &&
         other.sku == sku &&
-        other.modelNumber == modelNumber &&
         other.brandId == brandId &&
         other.categoryId == categoryId &&
         other.subcategoryId == subcategoryId &&
         other.manufacturerId == manufacturerId &&
         listEquals(other.compatibleCarIds, compatibleCarIds) &&
-        listEquals(other.categories, categories) &&
         other.price == price &&
         other.discount == discount &&
         other.stockQuantity == stockQuantity &&
         other.minOrderQuantity == minOrderQuantity &&
-        mapEquals(other.specifications, specifications) &&
-        other.technicalSpecificationPdf == technicalSpecificationPdf &&
+        other.maxOrderQuantity == maxOrderQuantity &&
         other.weight == weight &&
         other.dimensions == dimensions &&
+        other.material == material &&
+        other.color == color &&
+        other.technicalSpecificationPdf == technicalSpecificationPdf &&
+        other.installationGuidePdf == installationGuidePdf &&
         other.shippingCost == shippingCost &&
+        other.shippingTime == shippingTime &&
+        other.originCountry == originCountry &&
         other.isActive == isActive &&
+        other.isFeatured == isFeatured &&
+        other.isApproved == isApproved &&
         listEquals(other.images, images);
   }
 
@@ -207,23 +269,28 @@ class Product {
     name.hashCode ^
     description.hashCode ^
     sku.hashCode ^
-    modelNumber.hashCode ^
     brandId.hashCode ^
     categoryId.hashCode ^
     subcategoryId.hashCode ^
     manufacturerId.hashCode ^
     compatibleCarIds.hashCode ^
-    categories.hashCode ^
     price.hashCode ^
     discount.hashCode ^
     stockQuantity.hashCode ^
     minOrderQuantity.hashCode ^
-    specifications.hashCode ^
-    technicalSpecificationPdf.hashCode ^
+    maxOrderQuantity.hashCode ^
     weight.hashCode ^
     dimensions.hashCode ^
+    material.hashCode ^
+    color.hashCode ^
+    technicalSpecificationPdf.hashCode ^
+    installationGuidePdf.hashCode ^
     shippingCost.hashCode ^
+    shippingTime.hashCode ^
+    originCountry.hashCode ^
     isActive.hashCode ^
+    isFeatured.hashCode ^
+    isApproved.hashCode ^
     images.hashCode;
   }
 
@@ -236,11 +303,6 @@ class Product {
   bool get isLowStock => stockQuantity <= 10;
   bool get isOutOfStock => stockQuantity <= 0;
 
-  // Compatibility getters for old field names
-  int get stock => stockQuantity;
-  bool get availability => isActive;
-  Map<String, dynamic> get technicalSpecifications => specifications;
-
   String get formattedPrice => '₹${price.toStringAsFixed(2)}';
   double get discountedPrice => price - (price * (discount / 100));
   String get formattedDiscountedPrice => '₹${discountedPrice.toStringAsFixed(2)}';
@@ -251,6 +313,10 @@ class Product {
   String get formattedDimensions => dimensions ?? 'Not specified';
   String get formattedWeight => '$weight kg';
   String get formattedShippingCost => shippingCost > 0 ? '₹${shippingCost.toStringAsFixed(2)}' : 'Free Shipping';
+  String get formattedMaterial => material ?? 'Not specified';
+  String get formattedColor => color ?? 'Not specified';
+  String get formattedShippingTime => shippingTime ?? 'Not specified';
+  String get formattedOriginCountry => originCountry ?? 'Not specified';
 
   static List<Product> sortByName(List<Product> products, {bool ascending = true}) {
     products.sort((a, b) => ascending

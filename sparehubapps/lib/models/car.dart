@@ -1,4 +1,5 @@
 import 'brand.dart';
+import 'dart:convert';
 
 class Car {
   final int id;
@@ -49,11 +50,11 @@ class Car {
 
   factory Car.fromJson(Map<String, dynamic> json) {
     return Car(
-      id: json['id'],
-      brand: Brand.fromJson(json['brand']),
-      name: json['name'],
-      model: json['model'],
-      year: json['year'],
+      id: int.parse(json['id'].toString()), // Explicitly parse id as int
+      brand: Brand.fromJson(json['brand'] ?? {}),
+      name: json['name'] ?? '',
+      model: json['model'] ?? '',
+      year: json['year'] ?? 0,
       description: json['description'],
       isActive: json['is_active'] ?? true,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,

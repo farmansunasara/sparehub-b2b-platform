@@ -8,7 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   static String get baseUrl => _baseUrl;
-  static const String _baseUrl = 'http://192.168.31.155:8000/api/users';
+  static const String _baseUrl = 'http://192.168.31.155:8000/api';
   static const String _tokenKey = 'auth_token';
   static const String _refreshTokenKey = 'refresh_token';
 
@@ -47,10 +47,12 @@ class ApiService {
     final token = await authToken;
     if (token != null) {
       headers['Authorization'] = 'Bearer $token';
+      _logger.i('Using access token: $token');
+    } else {
+      _logger.w('No access token available');
     }
     return headers;
   }
-
   Future<bool> _checkConnectivity() async {
     final connectivityResult = await _connectivity.checkConnectivity();
     return connectivityResult != ConnectivityResult.none;
@@ -74,7 +76,7 @@ class ApiService {
 
       _logger.i('Attempting to refresh token...');
       final response = await _client.post(
-        Uri.parse('$_baseUrl/refresh-token/'),
+        Uri.parse('$_baseUrl/token/refresh/'), // Updated to standard JWT endpoint
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'refresh': currentRefreshToken}),
       );
@@ -116,7 +118,6 @@ class ApiService {
       throw ApiException(message: 'Authentication required', statusCode: 401);
     }
   }
-
   Future<T> _handleResponse<T>(Future<http.Response> Function(Map<String, String> headers) request) async {
     try {
       if (!await _checkConnectivity()) {
@@ -166,8 +167,8 @@ class ApiService {
         }
       }
 
+      _logger.e('API Error: ${response.statusCode} - Response Body: ${response.body}');
       final error = body['message'] ?? body['error'] ?? body['detail'] ?? 'Something went wrong';
-      _logger.e('API Error: ${response.statusCode} - $error');
       throw ApiException(message: error, statusCode: response.statusCode);
     } catch (e) {
       if (e is ApiException) {
@@ -179,11 +180,97 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> sendMultipartRequest(http.MultipartRequest request) async {
+    try {
+      if (!await _checkConnectivity()) {
+        _logger.w('No internet connection');
+        throw ApiException(message: 'No internet connection', statusCode: 503);
+      }
+
+      final headers = await _getHeaders();
+      request.headers.addAll(headers);
+
+      // Log request fields and files
+      _logger.i('Multipart Request Fields: ${request.fields}');
+      _logger.i('Multipart Request Files: ${request.files.map((file) => file.filename).toList()}');
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.headers['content-type']?.contains('text/html') ?? false) {
+        _logger.e('Server returned HTML instead of JSON: ${response.body}');
+        throw ApiException(message: 'Server error occurred', statusCode: response.statusCode);
+      }
+
+      dynamic body;
+      try {
+        body = json.decode(response.body);
+        if (body is! Map<String, dynamic> && body is! List) {
+          _logger.e('Unexpected response type: ${body.runtimeType}');
+          throw ApiException(message: 'Invalid response format', statusCode: response.statusCode);
+        }
+      } catch (e) {
+        _logger.e('Failed to parse JSON response: $e\nResponse: ${response.body}');
+        throw ApiException(message: 'Invalid response format', statusCode: response.statusCode);
+      }
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        _logger.i('API Success: ${request.url}');
+        return body as Map<String, dynamic>;
+      }
+
+      if (response.statusCode == 401) {
+        if (await _hasValidTokens()) {
+          _logger.w('Token expired, attempting refresh');
+          try {
+            await refreshAccessToken();
+            request.headers.clear();
+            final newHeaders = await _getHeaders();
+            request.headers.addAll(newHeaders);
+            final retryResponse = await request.send();
+            final retryResult = await http.Response.fromStream(retryResponse);
+            final retryBody = json.decode(retryResult.body);
+            if (retryResult.statusCode >= 200 && retryResult.statusCode < 300) {
+              return retryBody as Map<String, dynamic>;
+            }
+            throw ApiException(message: 'Retry failed', statusCode: retryResult.statusCode);
+          } catch (e) {
+            _logger.e('Token refresh failed: $e');
+            await clearTokens();
+            throw ApiException(message: 'Authentication required', statusCode: 401);
+          }
+        } else {
+          _logger.i('No valid tokens for refresh');
+          throw ApiException(message: 'Authentication required', statusCode: 401);
+        }
+      }
+
+      // Improved error handling for 400 responses
+      _logger.e('API Error: ${response.statusCode} - Response Body: ${response.body}');
+      String errorMessage = 'Something went wrong';
+      if (body is Map<String, dynamic>) {
+        if (body.containsKey('message') || body.containsKey('error') || body.containsKey('detail')) {
+          errorMessage = body['message'] ?? body['error'] ?? body['detail'] ?? errorMessage;
+        } else {
+          // Handle field-specific errors (e.g., {"name": "This field is required."})
+          errorMessage = body.entries.map((e) => '${e.key}: ${e.value is List ? e.value.join(", ") : e.value}').join('; ');
+        }
+      }
+      throw ApiException(message: errorMessage, statusCode: response.statusCode);
+    } catch (e) {
+      if (e is ApiException) {
+        _logger.e('API Exception: ${e.message}');
+        rethrow;
+      }
+      _logger.e('Unexpected Error: $e');
+      throw ApiException(message: e.toString(), statusCode: 500);
+    }
+  }
   Future<Map<String, dynamic>> login(String email, String password) async {
     _logger.i('Attempting login for user: $email');
 
     final response = await _handleResponse((headers) => _client.post(
-      Uri.parse('$_baseUrl/login/'),
+      Uri.parse('$_baseUrl/users/login/'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'username': email,
@@ -194,7 +281,6 @@ class ApiService {
     _logger.i('Login response received: $response');
 
     try {
-      // Validate response structure
       if (response['access'] == null) {
         _logger.e('No access token in response: $response');
         throw ApiException(message: 'Invalid login response: Missing access token', statusCode: 401);
@@ -227,7 +313,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> registerManufacturer(Map<String, dynamic> data) async {
     return _handleResponse((headers) => _client.post(
-      Uri.parse('$_baseUrl/register-manufacturer/'),
+      Uri.parse('$_baseUrl/users/register-manufacturer/'),
       headers: headers,
       body: json.encode(data),
     ));
@@ -235,7 +321,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> registerShop(Map<String, dynamic> data) async {
     return _handleResponse((headers) => _client.post(
-      Uri.parse('$_baseUrl/register-shop/'),
+      Uri.parse('$_baseUrl/users/register-shop/'),
       headers: headers,
       body: json.encode(data),
     ));
@@ -244,7 +330,7 @@ class ApiService {
   Future<void> logout() async {
     if (await _hasValidTokens()) {
       await _handleResponse((headers) => _client.post(
-        Uri.parse('$_baseUrl/logout/'),
+        Uri.parse('$_baseUrl/users/logout/'),
         headers: headers,
       ));
     }
@@ -253,7 +339,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getUserProfile() async {
     final response = await _handleResponse((headers) => _client.get(
-      Uri.parse('$_baseUrl/profile/'),
+      Uri.parse('$_baseUrl/users/profile/'),
       headers: headers,
     ));
     _logger.i('User profile response: $response');
@@ -262,7 +348,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
     final response = await _handleResponse((headers) => _client.put(
-      Uri.parse('$_baseUrl/profile/'),
+      Uri.parse('$_baseUrl/users/profile/'),
       headers: headers,
       body: json.encode(data),
     ));
@@ -271,64 +357,47 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> getBrands() async {
-    final response = await _handleResponse((headers) => _client.get(
-      Uri.parse('$_baseUrl/brands/'),
+    final response = await _handleResponse<List<dynamic>>((headers) => _client.get(
+      Uri.parse('$_baseUrl/products/brands/'),
       headers: headers,
     ));
 
-    if (response is List) {
-      return response.map((item) => item as Map<String, dynamic>).toList();
-    }
-
-    final brands = response['brands'] as List<dynamic>?;
-    return brands?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+    return response.cast<Map<String, dynamic>>();
   }
 
   Future<List<Map<String, dynamic>>> getCategories() async {
-    final response = await _handleResponse((headers) => _client.get(
-      Uri.parse('$_baseUrl/categories/'),
+    final response = await _handleResponse<List<dynamic>>((headers) => _client.get(
+      Uri.parse('$_baseUrl/products/categories/'),
       headers: headers,
     ));
 
-    if (response is List) {
-      return response.map((item) => item as Map<String, dynamic>).toList();
-    }
-
-    final categories = response['categories'] as List<dynamic>?;
-    return categories?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+    return response.cast<Map<String, dynamic>>();
   }
 
-  Future<List<Map<String, dynamic>>> getSubcategories() async {
-    final response = await _handleResponse((headers) => _client.get(
-      Uri.parse('$_baseUrl/subcategories/'),
+  Future<List<Map<String, dynamic>>> getSubcategories({int? categoryId}) async {
+    final uri = Uri.parse('$_baseUrl/products/subcategories/').replace(
+      queryParameters: categoryId != null ? {'category_id': categoryId.toString()} : null,
+    );
+    final response = await _handleResponse<List<dynamic>>((headers) => _client.get(
+      uri,
       headers: headers,
     ));
 
-    if (response is List) {
-      return response.map((item) => item as Map<String, dynamic>).toList();
-    }
-
-    final subcategories = response['subcategories'] as List<dynamic>?;
-    return subcategories?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+    return response.cast<Map<String, dynamic>>();
   }
 
   Future<List<Map<String, dynamic>>> getCars() async {
-    final response = await _handleResponse((headers) => _client.get(
-      Uri.parse('$_baseUrl/cars/'),
+    final response = await _handleResponse<List<dynamic>>((headers) => _client.get(
+      Uri.parse('$_baseUrl/products/cars/'),
       headers: headers,
     ));
 
-    if (response is List) {
-      return response.map((item) => item as Map<String, dynamic>).toList();
-    }
-
-    final cars = response['cars'] as List<dynamic>?;
-    return cars?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+    return response.cast<Map<String, dynamic>>();
   }
 
   Future<Map<String, dynamic>> createProduct(Map<String, dynamic> product) async {
     return _handleResponse((headers) => _client.post(
-      Uri.parse('$_baseUrl/products/add/'),
+      Uri.parse('$_baseUrl/products/'),
       headers: headers,
       body: json.encode(product),
     ));
@@ -344,7 +413,7 @@ class ApiService {
 
   Future<void> deleteProduct(String id) async {
     await _handleResponse((headers) => _client.delete(
-      Uri.parse('$_baseUrl/products/delete/$id/'),
+      Uri.parse('$_baseUrl/products/$id/'),
       headers: headers,
     ));
   }
@@ -357,17 +426,13 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> getProducts() async {
-    final response = await _handleResponse((headers) => _client.get(
+    final response = await _handleResponse<List<dynamic>>((headers) => _client.get(
       Uri.parse('$_baseUrl/products/'),
       headers: headers,
     ));
 
-    if (response is List) {
-      return response.map((item) => item as Map<String, dynamic>).toList();
-    }
-
-    final products = response['products'] as List<dynamic>?;
-    return products?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+    _logger.i('Products API Response: $response');
+    return response.cast<Map<String, dynamic>>();
   }
 
   Future<Map<String, dynamic>> createOrder(Map<String, dynamic> order) async {
@@ -405,17 +470,12 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> getOrders() async {
-    final response = await _handleResponse((headers) => _client.get(
+    final response = await _handleResponse<List<dynamic>>((headers) => _client.get(
       Uri.parse('$_baseUrl/orders/'),
       headers: headers,
     ));
 
-    if (response is List) {
-      return response.map((item) => item as Map<String, dynamic>).toList();
-    }
-
-    final orders = response['orders'] as List<dynamic>?;
-    return orders?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+    return response.cast<Map<String, dynamic>>();
   }
 
   Future<Map<String, dynamic>> createAddress(Map<String, dynamic> address) async {
@@ -442,31 +502,21 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> getAddresses() async {
-    final response = await _handleResponse((headers) => _client.get(
+    final response = await _handleResponse<List<dynamic>>((headers) => _client.get(
       Uri.parse('$_baseUrl/addresses/'),
       headers: headers,
     ));
 
-    if (response is List) {
-      return response.map((item) => item as Map<String, dynamic>).toList();
-    }
-
-    final addresses = response['addresses'] as List<dynamic>?;
-    return addresses?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+    return response.cast<Map<String, dynamic>>();
   }
 
   Future<List<Map<String, dynamic>>> getNotifications() async {
-    final response = await _handleResponse((headers) => _client.get(
+    final response = await _handleResponse<List<dynamic>>((headers) => _client.get(
       Uri.parse('$_baseUrl/notifications/'),
       headers: headers,
     ));
 
-    if (response is List) {
-      return response.map((item) => item as Map<String, dynamic>).toList();
-    }
-
-    final notifications = response['notifications'] as List<dynamic>?;
-    return notifications?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+    return response.cast<Map<String, dynamic>>();
   }
 
   Future<void> markNotificationAsRead(String id) async {

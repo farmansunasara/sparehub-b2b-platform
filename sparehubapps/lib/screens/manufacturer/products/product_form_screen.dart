@@ -26,19 +26,25 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _discountController = TextEditingController();
   final _stockController = TextEditingController();
   final _minOrderQuantityController = TextEditingController();
-  final _modelNumberController = TextEditingController();
+  final _maxOrderQuantityController = TextEditingController();
   final _weightController = TextEditingController();
   final _dimensionsController = TextEditingController();
+  final _materialController = TextEditingController();
+  final _colorController = TextEditingController();
   final _shippingCostController = TextEditingController();
+  final _shippingTimeController = TextEditingController();
+  final _originCountryController = TextEditingController();
 
   int? _selectedBrandId;
   int? _selectedCategoryId;
   int? _selectedSubcategoryId;
   final List<int> _selectedCompatibleCarIds = [];
   final List<XFile> _selectedImages = [];
-  XFile? _selectedPdfFile;
-  final Map<String, TextEditingController> _specificationControllers = {};
+  XFile? _selectedTechnicalPdfFile;
+  XFile? _selectedInstallationPdfFile;
   bool _isActive = true;
+  bool _isFeatured = false;
+  bool _isApproved = false;
   bool _isLoading = false;
 
   @override
@@ -52,21 +58,34 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _discountController.text = widget.product!.discount.toString();
       _stockController.text = widget.product!.stockQuantity.toString();
       _minOrderQuantityController.text = widget.product!.minOrderQuantity.toString();
-      _modelNumberController.text = widget.product!.modelNumber ?? '';
+      _maxOrderQuantityController.text = widget.product!.maxOrderQuantity?.toString() ?? '';
       _weightController.text = widget.product!.weight.toString();
       _dimensionsController.text = widget.product!.dimensions ?? '';
+      _materialController.text = widget.product!.material ?? '';
+      _colorController.text = widget.product!.color ?? '';
       _shippingCostController.text = widget.product!.shippingCost.toString();
+      _shippingTimeController.text = widget.product!.shippingTime ?? '';
+      _originCountryController.text = widget.product!.originCountry ?? '';
 
       _selectedBrandId = widget.product!.brandId;
       _selectedCategoryId = widget.product!.categoryId;
       _selectedSubcategoryId = widget.product!.subcategoryId;
       _selectedCompatibleCarIds.addAll(widget.product!.compatibleCarIds);
       _isActive = widget.product!.isActive;
-
-      widget.product!.specifications.forEach((key, value) {
-        _specificationControllers[key] = TextEditingController(text: value.toString());
-      });
+      _isFeatured = widget.product!.isFeatured;
+      _isApproved = widget.product!.isApproved;
     }
+    // Ensure categories are fetched
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<ManufacturerProvider>(context, listen: false);
+      if (provider.categories.isEmpty) {
+        provider.refreshCategories();
+      }
+      // Fetch subcategories for the initial category if editing a product
+      if (_selectedCategoryId != null) {
+        provider.refreshSubcategories(categoryId: _selectedCategoryId);
+      }
+    });
   }
 
   @override
@@ -78,11 +97,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _discountController.dispose();
     _stockController.dispose();
     _minOrderQuantityController.dispose();
-    _modelNumberController.dispose();
+    _maxOrderQuantityController.dispose();
     _weightController.dispose();
     _dimensionsController.dispose();
+    _materialController.dispose();
+    _colorController.dispose();
     _shippingCostController.dispose();
-    _specificationControllers.values.forEach((controller) => controller.dispose());
+    _shippingTimeController.dispose();
+    _originCountryController.dispose();
     super.dispose();
   }
 
@@ -97,58 +119,28 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     }
   }
 
-  void _addSpecification() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final keyController = TextEditingController();
-        final valueController = TextEditingController();
-
-        return AlertDialog(
-          title: const Text('Add Specification'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: keyController,
-                decoration: const InputDecoration(
-                  labelText: 'Specification Name',
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: valueController,
-                decoration: const InputDecoration(
-                  labelText: 'Value',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (keyController.text.isNotEmpty && valueController.text.isNotEmpty) {
-                  setState(() {
-                    _specificationControllers[keyController.text] =
-                        TextEditingController(text: valueController.text);
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future<void> _saveProduct() async {
     if (_formKey.currentState?.validate() ?? false) {
+      if (_selectedCategoryId == null || _selectedSubcategoryId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select category and subcategory'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      if (_selectedImages.isEmpty && widget.product == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select at least one image'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       setState(() {
         _isLoading = true;
       });
@@ -157,42 +149,49 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         final provider = Provider.of<ManufacturerProvider>(context, listen: false);
         final manufacturerId = provider.manufacturerId;
 
-        if (_selectedCategoryId == null || _selectedSubcategoryId == null) {
-          throw Exception('Please select category and subcategory');
+        if (manufacturerId.isEmpty) {
+          throw Exception('Manufacturer ID is missing');
         }
+
+        // Log compatible_car_ids for debugging
+        print('Selected Compatible Car IDs: $_selectedCompatibleCarIds');
 
         final product = Product(
           id: widget.product?.id,
-          name: _nameController.text,
-          description: _descriptionController.text,
-          sku: _skuController.text,
-          modelNumber: _modelNumberController.text.isEmpty ? null : _modelNumberController.text,
+          name: _nameController.text.trim(),
+          description: _descriptionController.text.trim(),
+          sku: _skuController.text.trim(),
           brandId: _selectedBrandId,
           categoryId: _selectedCategoryId!,
           subcategoryId: _selectedSubcategoryId!,
           manufacturerId: int.parse(manufacturerId),
           compatibleCarIds: _selectedCompatibleCarIds,
-          price: double.parse(_priceController.text),
-          discount: double.tryParse(_discountController.text) ?? 0.0,
-          stockQuantity: int.parse(_stockController.text),
-          minOrderQuantity: int.tryParse(_minOrderQuantityController.text) ?? 1,
-          specifications: Map.fromEntries(
-            _specificationControllers.entries.map(
-                  (e) => MapEntry(e.key, e.value.text),
-            ),
-          ),
-          weight: double.parse(_weightController.text),
-          dimensions: _dimensionsController.text.isEmpty ? null : _dimensionsController.text,
-          shippingCost: double.tryParse(_shippingCostController.text) ?? 0.0,
+          price: double.parse(_priceController.text.trim()),
+          discount: double.tryParse(_discountController.text.trim()) ?? 0.0,
+          stockQuantity: int.parse(_stockController.text.trim()),
+          minOrderQuantity: int.tryParse(_minOrderQuantityController.text.trim()) ?? 1,
+          maxOrderQuantity: int.tryParse(_maxOrderQuantityController.text.trim()),
+          weight: double.parse(_weightController.text.trim()),
+          dimensions: _dimensionsController.text.trim().isEmpty ? null : _dimensionsController.text.trim(),
+          material: _materialController.text.trim().isEmpty ? null : _materialController.text.trim(),
+          color: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
+          technicalSpecificationPdf: widget.product?.technicalSpecificationPdf,
+          installationGuidePdf: widget.product?.installationGuidePdf,
+          shippingCost: double.tryParse(_shippingCostController.text.trim()) ?? 0.0,
+          shippingTime: _shippingTimeController.text.trim().isEmpty ? null : _shippingTimeController.text.trim(),
+          originCountry: _originCountryController.text.trim().isEmpty ? null : _originCountryController.text.trim(),
           isActive: _isActive,
-          images: const [], // Will be handled by the provider
+          isFeatured: _isFeatured,
+          isApproved: _isApproved,
+          images: widget.product?.images ?? [],
         );
 
         if (widget.product == null) {
           await provider.addProduct(
             product: product,
             images: _selectedImages.map((x) => File(x.path)).toList(),
-            technicalSpecificationPdf: _selectedPdfFile != null ? File(_selectedPdfFile!.path) : null,
+            technicalSpecificationPdf: _selectedTechnicalPdfFile != null ? File(_selectedTechnicalPdfFile!.path) : null,
+            installationGuidePdf: _selectedInstallationPdfFile != null ? File(_selectedInstallationPdfFile!.path) : null,
           );
         } else {
           await provider.updateProduct(product);
@@ -202,6 +201,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           Navigator.pop(context);
         }
       } catch (e) {
+        print('Error in _saveProduct: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
@@ -227,8 +227,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         title: Text(widget.product == null ? 'Add Product' : 'Edit Product'),
       ),
       body: LoadingOverlay(
-        isLoading: _isLoading,
-        child: Form(
+        isLoading: _isLoading || provider.isLoading,
+        child: provider.error != null
+            ? Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Error: ${provider.error}'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => provider.refreshCategories(),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        )
+            : Form(
           key: _formKey,
           child: ListView(
             padding: const EdgeInsets.all(16),
@@ -274,7 +288,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<int>(
+              provider.categories.isEmpty
+                  ? const Text('No categories available. Please try again.')
+                  : DropdownButtonFormField<int>(
                 value: _selectedCategoryId,
                 decoration: const InputDecoration(
                   labelText: 'Category',
@@ -289,14 +305,19 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 onChanged: (value) {
                   setState(() {
                     _selectedCategoryId = value;
-                    _selectedSubcategoryId = null; // Reset subcategory when category changes
+                    _selectedSubcategoryId = null; // Reset subcategory
                   });
+                  // Fetch subcategories for the selected category
+                  final provider = Provider.of<ManufacturerProvider>(context, listen: false);
+                  provider.refreshSubcategories(categoryId: value);
                 },
                 validator: (value) => value == null ? 'Please select a category' : null,
               ),
               const SizedBox(height: 16),
               if (_selectedCategoryId != null)
-                DropdownButtonFormField<int>(
+                provider.getSubcategories(_selectedCategoryId!).isEmpty
+                    ? const Text('No subcategories available for this category.')
+                    : DropdownButtonFormField<int>(
                   value: _selectedSubcategoryId,
                   decoration: const InputDecoration(
                     labelText: 'Subcategory',
@@ -354,7 +375,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 children: provider.cars.map((car) {
                   final isSelected = _selectedCompatibleCarIds.contains(car.id);
                   return FilterChip(
-                    label: Text(car.name),
+                    label: Text(car.displayName),
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
@@ -417,16 +438,32 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ),
                 validator: FormValidators.validateQuantity,
               ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _maxOrderQuantityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Maximum Order Quantity',
+                  hintText: 'Enter maximum order quantity (optional)',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return null;
+                  final qty = int.tryParse(value);
+                  if (qty == null) return 'Please enter a valid number';
+                  if (qty < 0) return 'Quantity cannot insignNow be negative';
+                  return null;
+                },
+              ),
 
               // Technical Specification PDF
               const SizedBox(height: 32),
               Text(
-                'Technical Specification',
+                'Technical Specification PDF',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
               PdfUploadSection(
-                selectedPdfFile: _selectedPdfFile,
+                selectedPdfFile: _selectedTechnicalPdfFile,
                 existingPdfUrl: widget.product?.technicalSpecificationPdf,
                 onPickPdf: () async {
                   final ImagePicker picker = ImagePicker();
@@ -434,7 +471,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     final XFile? file = await picker.pickMedia();
                     if (file != null && file.path.toLowerCase().endsWith('.pdf')) {
                       setState(() {
-                        _selectedPdfFile = file;
+                        _selectedTechnicalPdfFile = file;
                       });
                     } else {
                       if (mounted) {
@@ -459,52 +496,56 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 },
                 onClearPdf: () {
                   setState(() {
-                    _selectedPdfFile = null;
+                    _selectedTechnicalPdfFile = null;
                   });
                 },
               ),
 
-              // Specifications
+              // Installation Guide PDF
               const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Specifications',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: _addSpecification,
-                  ),
-                ],
+              Text(
+                'Installation Guide PDF',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              ..._specificationControllers.entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: entry.value,
-                          decoration: InputDecoration(
-                            labelText: entry.key,
+              PdfUploadSection(
+                selectedPdfFile: _selectedInstallationPdfFile,
+                existingPdfUrl: widget.product?.installationGuidePdf,
+                onPickPdf: () async {
+                  final ImagePicker picker = ImagePicker();
+                  try {
+                    final XFile? file = await picker.pickMedia();
+                    if (file != null && file.path.toLowerCase().endsWith('.pdf')) {
+                      setState(() {
+                        _selectedInstallationPdfFile = file;
+                      });
+                    } else {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select a PDF file'),
+                            backgroundColor: Colors.red,
                           ),
+                        );
+                      }
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error picking PDF: ${e.toString()}'),
+                          backgroundColor: Colors.red,
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          setState(() {
-                            _specificationControllers.remove(entry.key);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                      );
+                    }
+                  }
+                },
+                onClearPdf: () {
+                  setState(() {
+                    _selectedInstallationPdfFile = null;
+                  });
+                },
+              ),
 
               // Product Images
               const SizedBox(height: 32),
@@ -562,14 +603,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _modelNumberController,
-                decoration: const InputDecoration(
-                  labelText: 'Model Number',
-                  hintText: 'Enter model number (optional)',
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
                 controller: _weightController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -590,6 +623,29 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _materialController,
+                decoration: const InputDecoration(
+                  labelText: 'Material',
+                  hintText: 'Enter material (optional)',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _colorController,
+                decoration: const InputDecoration(
+                  labelText: 'Color',
+                  hintText: 'Enter color (optional)',
+                ),
+              ),
+
+              // Shipping Details
+              const SizedBox(height: 32),
+              Text(
+                'Shipping Details',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
                 controller: _shippingCostController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -599,9 +655,30 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ),
                 validator: FormValidators.validateShippingCost,
               ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _shippingTimeController,
+                decoration: const InputDecoration(
+                  labelText: 'Shipping Time',
+                  hintText: 'Enter shipping time (e.g., 3-5 days)',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _originCountryController,
+                decoration: const InputDecoration(
+                  labelText: 'Origin Country',
+                  hintText: 'Enter origin country (optional)',
+                ),
+              ),
 
-              // Active Status
+              // Status and Flags
               const SizedBox(height: 32),
+              Text(
+                'Status and Flags',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
               SwitchListTile(
                 title: const Text('Product Status'),
                 subtitle: Text(_isActive ? 'Active' : 'Inactive'),
@@ -611,6 +688,24 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     _isActive = value;
                   });
                 },
+              ),
+              SwitchListTile(
+                title: const Text('Featured Product'),
+                subtitle: Text(_isFeatured ? 'Featured' : 'Not Featured'),
+                value: _isFeatured,
+                onChanged: (value) {
+                  setState(() {
+                    _isFeatured = value;
+                  });
+                },
+              ),
+              ListTile(
+                title: const Text('Approval Status'),
+                subtitle: Text(_isApproved ? 'Approved' : 'Pending Approval'),
+                trailing: Icon(
+                  _isApproved ? Icons.check_circle : Icons.hourglass_empty,
+                  color: _isApproved ? Colors.green : Colors.grey,
+                ),
               ),
 
               const SizedBox(height: 32),

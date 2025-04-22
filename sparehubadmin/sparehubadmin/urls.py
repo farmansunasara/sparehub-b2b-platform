@@ -19,13 +19,10 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from users.views import UserProfileView
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('users.urls')),
-    path('api/products/', include('products.urls')),
-    path('api/orders/', include('orders.urls')),
+    path('api/products/', include('products.urls')),  # Ensure this is correct    path('api/orders/', include('orders.urls')),
     path('api/addresses/', include('addresses.urls')),
     path('api/notifications/', include('notifications.urls')),
     path('api/settings/', include('settings.urls')),

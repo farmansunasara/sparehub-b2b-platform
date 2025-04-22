@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User
+from .models import User, Manufacturer, Shop
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -20,3 +20,13 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'username', 'password1', 'password2', 'role', 'is_staff', 'is_active'),
         }),
     )
+
+@admin.register(Manufacturer)
+class ManufacturerAdmin(admin.ModelAdmin):
+    list_display = ('company_name', 'contact_name', 'phone', 'gst', 'city', 'country')
+    search_fields = ('company_name', 'contact_name', 'phone', 'gst', 'city', 'country')
+
+@admin.register(Shop)
+class ShopAdmin(admin.ModelAdmin):
+    list_display = ('shop_name', 'contact_name', 'phone', 'gst', 'city', 'country')
+    search_fields = ('shop_name', 'contact_name', 'phone', 'gst', 'city', 'country')

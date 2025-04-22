@@ -124,7 +124,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> with SingleTick
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.tune),
                   onPressed: () {
-                    // TODO: Show filters
+                    // TODO: Implement filters
                   },
                 ),
                 border: OutlineInputBorder(
@@ -214,7 +214,6 @@ class _ProductsListScreenState extends State<ProductsListScreen> with SingleTick
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () {
-          // Navigate to edit product
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -357,21 +356,6 @@ class _ProductsListScreenState extends State<ProductsListScreen> with SingleTick
                         style: TextStyle(
                           color: product.isLowStock ? Colors.orange : Colors.grey[600],
                           fontWeight: product.isLowStock ? FontWeight.bold : null,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.category_outlined,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          product.categories.join(', '),
-                          style: TextStyle(color: Colors.grey[600]),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

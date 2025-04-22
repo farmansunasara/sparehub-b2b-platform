@@ -115,25 +115,67 @@ class ProductDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Status Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: product.isActive
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      product.isActive ? 'Active' : 'Inactive',
-                      style: TextStyle(
-                        color: product.isActive ? Colors.green : Colors.grey,
-                        fontWeight: FontWeight.w500,
+                  // Status Badges
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: product.isActive
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          product.isActive ? 'Active' : 'Inactive',
+                          style: TextStyle(
+                            color: product.isActive ? Colors.green : Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
-                    ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: product.isApproved
+                              ? Colors.blue.withOpacity(0.1)
+                              : Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          product.isApproved ? 'Approved' : 'Pending Approval',
+                          style: TextStyle(
+                            color: product.isApproved ? Colors.blue : Colors.orange,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (product.isFeatured)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            'Featured',
+                            style: TextStyle(
+                              color: Colors.purple,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 
@@ -185,6 +227,17 @@ class ProductDetailsScreen extends StatelessWidget {
                           icon: Icons.inventory_2_outlined,
                           warning: product.isLowStock,
                         ),
+                        _buildInfoRow(
+                          'Minimum Order Quantity',
+                          product.minOrderQuantity.toString(),
+                          icon: Icons.shopping_cart_outlined,
+                        ),
+                        if (product.maxOrderQuantity != null)
+                          _buildInfoRow(
+                            'Maximum Order Quantity',
+                            product.maxOrderQuantity.toString(),
+                            icon: Icons.shopping_cart_outlined,
+                          ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: () {
@@ -204,45 +257,45 @@ class ProductDetailsScreen extends StatelessWidget {
                     title: 'Product Details',
                     content: Column(
                       children: [
-                        if (product.modelNumber != null)
-                          _buildInfoRow(
-                            'Model Number',
-                            product.modelNumber!,
-                            icon: Icons.tag_outlined,
-                          ),
-                        const SizedBox(height: 8),
                         _buildInfoRow(
                           'SKU',
                           product.sku,
                           icon: Icons.qr_code_outlined,
                         ),
-                        if (product.categories.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          _buildInfoRow(
-                            'Categories',
-                            product.categories.join(', '),
-                            icon: Icons.category_outlined,
-                          ),
-                        ],
-                        const SizedBox(height: 8),
                         _buildInfoRow(
                           'Weight',
                           product.formattedWeight,
                           icon: Icons.scale_outlined,
                         ),
-                        if (product.dimensions != null) ...[
-                          const SizedBox(height: 8),
-                          _buildInfoRow(
-                            'Dimensions',
-                            product.dimensions!,
-                            icon: Icons.straighten_outlined,
-                          ),
-                        ],
-                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                          'Dimensions',
+                          product.formattedDimensions,
+                          icon: Icons.straighten_outlined,
+                        ),
+                        _buildInfoRow(
+                          'Material',
+                          product.formattedMaterial,
+                          icon: Icons.build_outlined,
+                        ),
+                        _buildInfoRow(
+                          'Color',
+                          product.formattedColor,
+                          icon: Icons.color_lens_outlined,
+                        ),
                         _buildInfoRow(
                           'Shipping Cost',
                           product.formattedShippingCost,
                           icon: Icons.local_shipping_outlined,
+                        ),
+                        _buildInfoRow(
+                          'Shipping Time',
+                          product.formattedShippingTime,
+                          icon: Icons.access_time_outlined,
+                        ),
+                        _buildInfoRow(
+                          'Origin Country',
+                          product.formattedOriginCountry,
+                          icon: Icons.public_outlined,
                         ),
                       ],
                     ),
@@ -299,22 +352,53 @@ class ProductDetailsScreen extends StatelessWidget {
                       ),
                     ),
 
-                  // Specifications
-                  if (product.specifications.isNotEmpty)
+                  // Installation Guide PDF
+                  if (product.installationGuidePdf != null)
                     _buildInfoCard(
                       context,
-                      title: 'Specifications',
+                      title: 'Installation Guide',
                       content: Column(
-                        children: product.specifications.entries.map((entry) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: _buildInfoRow(
-                              entry.key,
-                              entry.value.toString(),
-                              icon: Icons.info_outline,
-                            ),
-                          );
-                        }).toList(),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.picture_as_pdf,
+                                color: Colors.red,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  product.installationGuidePdf!.split('/').last,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              final url = Uri.parse(product.installationGuidePdf!);
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url);
+                              } else {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Could not open PDF'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.visibility_outlined),
+                            label: const Text('View PDF'),
+                          ),
+                        ],
                       ),
                     ),
                 ],
@@ -357,36 +441,39 @@ class ProductDetailsScreen extends StatelessWidget {
         IconData? icon,
         bool warning = false,
       }) {
-    return Row(
-      children: [
-        if (icon != null) ...[
-          Icon(
-            icon,
-            size: 20,
-            color: warning ? Colors.orange : Colors.grey[600],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Icon(
+              icon,
+              size: 20,
+              color: warning ? Colors.orange : Colors.grey[600],
+            ),
+            const SizedBox(width: 8),
+          ],
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey[600],
+              ),
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 2,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: warning ? Colors.orange : null,
+              ),
+            ),
+          ),
         ],
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: Colors.grey[600],
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          flex: 2,
-          child: Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: warning ? Colors.orange : null,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
