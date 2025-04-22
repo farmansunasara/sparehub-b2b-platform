@@ -187,8 +187,12 @@ class ApiService {
         throw ApiException(message: 'No internet connection', statusCode: 503);
       }
 
-      final headers = await _getHeaders();
-      request.headers.addAll(headers);
+      final token = await authToken;
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      // Don't set Content-Type header for multipart requests
+      // It will be set automatically with the correct boundary
 
       // Log request fields and files
       _logger.i('Multipart Request Fields: ${request.fields}');
@@ -224,9 +228,10 @@ class ApiService {
           _logger.w('Token expired, attempting refresh');
           try {
             await refreshAccessToken();
-            request.headers.clear();
-            final newHeaders = await _getHeaders();
-            request.headers.addAll(newHeaders);
+            final newToken = await authToken;
+            if (newToken != null) {
+              request.headers['Authorization'] = 'Bearer $newToken';
+            }
             final retryResponse = await request.send();
             final retryResult = await http.Response.fromStream(retryResponse);
             final retryBody = json.decode(retryResult.body);

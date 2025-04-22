@@ -296,7 +296,7 @@ class _ProductsListScreenState extends State<ProductsListScreen> with SingleTick
                             case 'deactivate':
                               try {
                                 await provider.updateProduct(
-                                  product.copyWith(isActive: !product.isActive),
+                                  product: product.copyWith(isActive: !product.isActive),
                                 );
                               } catch (e) {
                                 if (mounted) {

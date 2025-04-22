@@ -139,7 +139,6 @@ class CartProvider with ChangeNotifier {
           categoryId: 0,
           subcategoryId: 0,
           manufacturerId: 0,
-          compatibleCarIds: const [],
           price: 0,
           stockQuantity: 0,
           weight: 0,

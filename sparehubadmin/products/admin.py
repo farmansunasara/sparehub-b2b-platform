@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, Category, Subcategory, Brand, Car, ProductImage, ProductCarCompatibility, ProductVariant
+from .models import Product, Category, Subcategory, Brand, ProductImage, ProductVariant
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
@@ -37,15 +37,6 @@ class BrandAdmin(admin.ModelAdmin):
     list_display = ['name', 'is_active', 'created_at']
     search_fields = ['name']
 
-@admin.register(Car)
-class CarAdmin(admin.ModelAdmin):
-    list_display = ['make', 'model', 'year', 'created_at']
-    search_fields = ['make', 'model']
-
-@admin.register(ProductCarCompatibility)
-class ProductCarCompatibilityAdmin(admin.ModelAdmin):
-    list_display = ['product', 'car', 'created_at']
-    search_fields = ['product__name', 'car__make', 'car__model']
 
 @admin.register(ProductVariant)
 class ProductVariantAdmin(admin.ModelAdmin):

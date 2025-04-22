@@ -50,11 +50,7 @@ class _StockManagementScreenState extends State<StockManagementScreen> {
 
     try {
       final provider = Provider.of<ManufacturerProvider>(context, listen: false);
-      if (product.id != null) {
-        await provider.updateProductStock(product.id!, newQuantity);
-      } else {
-        throw Exception('Product ID is required');
-      }
+      await provider.updateProductStock(product.id, newQuantity);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

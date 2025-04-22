@@ -38,7 +38,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   int? _selectedBrandId;
   int? _selectedCategoryId;
   int? _selectedSubcategoryId;
-  final List<int> _selectedCompatibleCarIds = [];
   final List<XFile> _selectedImages = [];
   XFile? _selectedTechnicalPdfFile;
   XFile? _selectedInstallationPdfFile;
@@ -70,7 +69,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _selectedBrandId = widget.product!.brandId;
       _selectedCategoryId = widget.product!.categoryId;
       _selectedSubcategoryId = widget.product!.subcategoryId;
-      _selectedCompatibleCarIds.addAll(widget.product!.compatibleCarIds);
       _isActive = widget.product!.isActive;
       _isFeatured = widget.product!.isFeatured;
       _isApproved = widget.product!.isApproved;
@@ -147,15 +145,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
       try {
         final provider = Provider.of<ManufacturerProvider>(context, listen: false);
-        final manufacturerId = provider.manufacturerId;
 
-        if (manufacturerId.isEmpty) {
-          throw Exception('Manufacturer ID is missing');
-        }
-
-        // Log compatible_car_ids for debugging
-        print('Selected Compatible Car IDs: $_selectedCompatibleCarIds');
-
+        // Create product object
         final product = Product(
           id: widget.product?.id,
           name: _nameController.text.trim(),
@@ -164,8 +155,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           brandId: _selectedBrandId,
           categoryId: _selectedCategoryId!,
           subcategoryId: _selectedSubcategoryId!,
-          manufacturerId: int.parse(manufacturerId),
-          compatibleCarIds: _selectedCompatibleCarIds,
+          manufacturerId: int.parse(provider.manufacturerId),
           price: double.parse(_priceController.text.trim()),
           discount: double.tryParse(_discountController.text.trim()) ?? 0.0,
           stockQuantity: int.parse(_stockController.text.trim()),
@@ -187,27 +177,51 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         );
 
         if (widget.product == null) {
+          // Create new product
           await provider.addProduct(
             product: product,
             images: _selectedImages.map((x) => File(x.path)).toList(),
             technicalSpecificationPdf: _selectedTechnicalPdfFile != null ? File(_selectedTechnicalPdfFile!.path) : null,
             installationGuidePdf: _selectedInstallationPdfFile != null ? File(_selectedInstallationPdfFile!.path) : null,
           );
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Product created successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pop(context);
+          }
         } else {
-          await provider.updateProduct(product);
-        }
+          // Update existing product
+          await provider.updateProduct(
+            product: product,
+            images: _selectedImages.isNotEmpty ? _selectedImages.map((x) => File(x.path)).toList() : null,
+            technicalSpecificationPdf: _selectedTechnicalPdfFile != null ? File(_selectedTechnicalPdfFile!.path) : null,
+            installationGuidePdf: _selectedInstallationPdfFile != null ? File(_selectedInstallationPdfFile!.path) : null,
+          );
 
-        if (mounted) {
-          Navigator.pop(context);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Product updated successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pop(context);
+          }
         }
       } catch (e) {
-        print('Error in _saveProduct: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } finally {
         if (mounted) {
           setState(() {
@@ -363,33 +377,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 },
               ),
 
-              // Compatible Cars
-              const SizedBox(height: 32),
-              Text(
-                'Compatible Cars',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                children: provider.cars.map((car) {
-                  final isSelected = _selectedCompatibleCarIds.contains(car.id);
-                  return FilterChip(
-                    label: Text(car.displayName),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _selectedCompatibleCarIds.add(car.id);
-                        } else {
-                          _selectedCompatibleCarIds.remove(car.id);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-
               // Price and Stock Information
               const SizedBox(height: 32),
               Text(
@@ -450,7 +437,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   if (value == null || value.isEmpty) return null;
                   final qty = int.tryParse(value);
                   if (qty == null) return 'Please enter a valid number';
-                  if (qty < 0) return 'Quantity cannot insignNow be negative';
+                  if (qty < 0) return 'Quantity cannot be negative';
                   return null;
                 },
               ),

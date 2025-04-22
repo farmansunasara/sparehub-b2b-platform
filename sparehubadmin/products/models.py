@@ -43,17 +43,6 @@ class Brand(models.Model):
     def __str__(self):
         return self.name
 
-class Car(models.Model):
-    make = models.CharField(max_length=100)
-    model = models.CharField(max_length=100)
-    year = models.PositiveIntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ['make', 'model', 'year']
-
-    def __str__(self):
-        return f"{self.make} {self.model} ({self.year})"
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
@@ -100,19 +89,6 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.product.name}"
-
-class ProductCarCompatibility(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='compatible_cars')
-    car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = 'Product Car Compatibilities'
-        unique_together = ['product', 'car']
-
-    def __str__(self):
-        return f"{self.product.name} - {self.car}"
 
 class ProductVariant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')

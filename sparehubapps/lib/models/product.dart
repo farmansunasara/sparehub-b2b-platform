@@ -10,7 +10,6 @@ class Product {
   final int categoryId;
   final int subcategoryId;
   final int manufacturerId;
-  final List<int> compatibleCarIds;
   final double price;
   final double discount;
   final int stockQuantity;
@@ -41,7 +40,6 @@ class Product {
     required this.categoryId,
     required this.subcategoryId,
     required this.manufacturerId,
-    required this.compatibleCarIds,
     required this.price,
     this.discount = 0.0,
     required this.stockQuantity,
@@ -73,7 +71,6 @@ class Product {
     int? categoryId,
     int? subcategoryId,
     int? manufacturerId,
-    List<int>? compatibleCarIds,
     double? price,
     double? discount,
     int? stockQuantity,
@@ -104,7 +101,6 @@ class Product {
       categoryId: categoryId ?? this.categoryId,
       subcategoryId: subcategoryId ?? this.subcategoryId,
       manufacturerId: manufacturerId ?? this.manufacturerId,
-      compatibleCarIds: compatibleCarIds ?? this.compatibleCarIds,
       price: price ?? this.price,
       discount: discount ?? this.discount,
       stockQuantity: stockQuantity ?? this.stockQuantity,
@@ -138,7 +134,6 @@ class Product {
       'category_id': categoryId,
       'subcategory_id': subcategoryId,
       'manufacturer': manufacturerId,
-      'compatible_car_ids': compatibleCarIds,
       'price': price,
       'discount': discount,
       'stock_quantity': stockQuantity,
@@ -163,42 +158,38 @@ class Product {
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    print('Parsing product JSON: $json'); // Add logging for debugging
     return Product(
       id: json['id']?.toString(),
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       sku: json['sku'] ?? '',
-      brandId: json['brand'] != null ? json['brand']['id'] : null,
-      categoryId: json['category'] != null
-          ? json['category']['id'] ?? json['category_id']
-          : json['category_id'],
-      subcategoryId: json['subcategory'] != null
-          ? json['subcategory']['id'] ?? json['subcategory_id']
-          : json['subcategory_id'],
-      manufacturerId: json['manufacturer'] ?? 0,
-      compatibleCarIds: json['compatible_cars'] != null
-          ? List<int>.from(json['compatible_cars'].map((car) => car['id'] ?? 0))
-          : json['compatible_car_ids'] != null
-          ? List<int>.from(json['compatible_car_ids'])
-          : [],
+      brandId: json['brand'] is Map ? json['brand']['id'] : json['brand_id'],
+      categoryId: json['category'] is Map 
+          ? json['category']['id'] 
+          : json['category_id'] ?? 0,
+      subcategoryId: json['subcategory'] is Map 
+          ? json['subcategory']['id'] 
+          : json['subcategory_id'] ?? 0,
+      manufacturerId: json['manufacturer'] is Map 
+          ? json['manufacturer']['id'] 
+          : (json['manufacturer'] ?? 0),
       price: json['price'] != null
           ? (json['price'] is num
-          ? json['price'].toDouble()
-          : double.tryParse(json['price'].toString()) ?? 0.0)
+              ? json['price'].toDouble()
+              : double.tryParse(json['price'].toString()) ?? 0.0)
           : 0.0,
       discount: json['discount'] != null
           ? (json['discount'] is num
-          ? json['discount'].toDouble()
-          : double.tryParse(json['discount'].toString()) ?? 0.0)
+              ? json['discount'].toDouble()
+              : double.tryParse(json['discount'].toString()) ?? 0.0)
           : 0.0,
       stockQuantity: json['stock_quantity'] ?? 0,
       minOrderQuantity: json['min_order_quantity'] ?? 1,
       maxOrderQuantity: json['max_order_quantity'],
       weight: json['weight'] != null
           ? (json['weight'] is num
-          ? json['weight'].toDouble()
-          : double.tryParse(json['weight'].toString()) ?? 0.0)
+              ? json['weight'].toDouble()
+              : double.tryParse(json['weight'].toString()) ?? 0.0)
           : 0.0,
       dimensions: json['dimensions'],
       material: json['material'],
@@ -207,8 +198,8 @@ class Product {
       installationGuidePdf: json['installation_guide_pdf'],
       shippingCost: json['shipping_cost'] != null
           ? (json['shipping_cost'] is num
-          ? json['shipping_cost'].toDouble()
-          : double.tryParse(json['shipping_cost'].toString()) ?? 0.0)
+              ? json['shipping_cost'].toDouble()
+              : double.tryParse(json['shipping_cost'].toString()) ?? 0.0)
           : 0.0,
       shippingTime: json['shipping_time'],
       originCountry: json['origin_country'],
@@ -242,7 +233,6 @@ class Product {
         other.categoryId == categoryId &&
         other.subcategoryId == subcategoryId &&
         other.manufacturerId == manufacturerId &&
-        listEquals(other.compatibleCarIds, compatibleCarIds) &&
         other.price == price &&
         other.discount == discount &&
         other.stockQuantity == stockQuantity &&
@@ -273,7 +263,6 @@ class Product {
     categoryId.hashCode ^
     subcategoryId.hashCode ^
     manufacturerId.hashCode ^
-    compatibleCarIds.hashCode ^
     price.hashCode ^
     discount.hashCode ^
     stockQuantity.hashCode ^
