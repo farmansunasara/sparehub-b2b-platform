@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../models/order.dart';
 import '../../../providers/order_provider.dart';
+import '../../../providers/theme_provider.dart';
 
 class OrdersScreen extends StatefulWidget {
   final String? initialOrderId;
@@ -23,62 +25,75 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DefaultTabController(
       length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('My Orders'),
-          bottom: const TabBar(
-            tabs: [
+      child: Column(
+        children: [
+          // TabBar
+          TabBar(
+            labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+            unselectedLabelStyle: GoogleFonts.poppins(),
+            labelColor: const Color(0xFFFF9800),
+            unselectedLabelColor: Colors.grey[600],
+            indicatorColor: const Color(0xFFFF9800),
+            tabs: const [
               Tab(text: 'All'),
               Tab(text: 'Active'),
               Tab(text: 'Completed'),
             ],
           ),
-        ),
-        body: Consumer<OrderProvider>(
-          builder: (context, provider, child) {
-            if (provider.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          // TabBarView
+          Expanded(
+            child: Consumer<OrderProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            if (provider.error != null) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      provider.error!,
-                      style: const TextStyle(color: Colors.red),
+                if (provider.error != null) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          provider.error!,
+                          style: GoogleFonts.poppins(color: Colors.red),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => provider.refreshOrders(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF9800),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Text('Retry', style: GoogleFonts.poppins()),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    FilledButton.tonal(
-                      onPressed: () => provider.refreshOrders(),
-                      child: const Text('Retry'),
+                  );
+                }
+
+                return TabBarView(
+                  children: [
+                    _OrdersList(
+                      orders: provider.orders,
+                      emptyMessage: 'No orders yet',
+                    ),
+                    _OrdersList(
+                      orders: provider.pendingOrders,
+                      emptyMessage: 'No active orders',
+                    ),
+                    _OrdersList(
+                      orders: provider.completedOrders,
+                      emptyMessage: 'No completed orders',
                     ),
                   ],
-                ),
-              );
-            }
-
-            return TabBarView(
-              children: [
-                _OrdersList(
-                  orders: provider.orders,
-                  emptyMessage: 'No orders yet',
-                ),
-                _OrdersList(
-                  orders: provider.pendingOrders,
-                  emptyMessage: 'No active orders',
-                ),
-                _OrdersList(
-                  orders: provider.completedOrders,
-                  emptyMessage: 'No completed orders',
-                ),
-              ],
-            );
-          },
-        ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -95,6 +110,7 @@ class _OrdersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (orders.isEmpty) {
       return Center(
         child: Column(
@@ -108,7 +124,7 @@ class _OrdersList extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               emptyMessage,
-              style: TextStyle(
+              style: GoogleFonts.poppins(
                 color: Colors.grey[600],
                 fontSize: 16,
               ),
@@ -134,12 +150,18 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
+      elevation: theme.cardTheme.elevation,
+      shape: theme.cardTheme.shape,
+      color: theme.cardTheme.color,
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to order details
+          Navigator.pushNamed(
+            context,
+            '/shop/orders/details',
+            arguments: order.id,
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -151,7 +173,7 @@ class _OrderCard extends StatelessWidget {
                 children: [
                   Text(
                     'Order #${order.id}',
-                    style: const TextStyle(
+                    style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -165,8 +187,8 @@ class _OrderCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      order.statusText,
-                      style: TextStyle(
+                      order.status.toString().split('.').last,
+                      style: GoogleFonts.poppins(
                         color: _getStatusColor(order.status),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -184,14 +206,14 @@ class _OrderCard extends StatelessWidget {
                       children: [
                         Text(
                           '${order.items.length} items',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.grey[600],
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          order.formattedTotal,
-                          style: TextStyle(
+                          '₹${order.total.toStringAsFixed(2)}',
+                          style: GoogleFonts.poppins(
                             color: theme.primaryColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -205,14 +227,14 @@ class _OrderCard extends StatelessWidget {
                     children: [
                       Text(
                         'Payment',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           color: Colors.grey[600],
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        order.paymentMethodText,
-                        style: const TextStyle(
+                        order.paymentMethod.toString().split('.').last,
+                        style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -228,13 +250,13 @@ class _OrderCard extends StatelessWidget {
                     if (order.canCancel)
                       TextButton(
                         onPressed: () => _showCancelDialog(context),
-                        child: const Text('Cancel Order'),
+                        child: Text('Cancel Order', style: GoogleFonts.poppins(color: Colors.red)),
                       ),
                     if (order.canReturn) ...[
                       if (order.canCancel) const SizedBox(width: 16),
                       TextButton(
                         onPressed: () => _showReturnDialog(context),
-                        child: const Text('Return Order'),
+                        child: Text('Return Order', style: GoogleFonts.poppins(color: Colors.red)),
                       ),
                     ],
                   ],
@@ -271,18 +293,20 @@ class _OrderCard extends StatelessWidget {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Order'),
+        title: Text('Cancel Order', style: GoogleFonts.poppins()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Are you sure you want to cancel this order?'),
+            Text('Are you sure you want to cancel this order?', style: GoogleFonts.poppins()),
             const SizedBox(height: 16),
             TextField(
               controller: reasonController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Reason for cancellation',
                 hintText: 'Optional',
+                labelStyle: GoogleFonts.poppins(),
+                hintStyle: GoogleFonts.poppins(),
               ),
               maxLines: 3,
             ),
@@ -291,11 +315,15 @@ class _OrderCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('No, Keep Order'),
+            child: Text('No, Keep Order', style: GoogleFonts.poppins()),
           ),
-          FilledButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes, Cancel Order'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9800),
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Yes, Cancel Order', style: GoogleFonts.poppins()),
           ),
         ],
       ),
@@ -313,6 +341,7 @@ class _OrderCard extends StatelessWidget {
               success
                   ? 'Order cancelled successfully'
                   : 'Failed to cancel order',
+              style: GoogleFonts.poppins(),
             ),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
@@ -326,18 +355,20 @@ class _OrderCard extends StatelessWidget {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Return Order'),
+        title: Text('Return Order', style: GoogleFonts.poppins()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Are you sure you want to return this order?'),
+            Text('Are you sure you want to return this order?', style: GoogleFonts.poppins()),
             const SizedBox(height: 16),
             TextField(
               controller: reasonController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Reason for return',
                 hintText: 'Required',
+                labelStyle: GoogleFonts.poppins(),
+                hintStyle: GoogleFonts.poppins(),
               ),
               maxLines: 3,
             ),
@@ -346,14 +377,14 @@ class _OrderCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('No, Keep Order'),
+            child: Text('No, Keep Order', style: GoogleFonts.poppins()),
           ),
-          FilledButton(
+          ElevatedButton(
             onPressed: () {
               if (reasonController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please provide a reason for return'),
+                  SnackBar(
+                    content: Text('Please provide a reason for return', style: GoogleFonts.poppins()),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -361,7 +392,11 @@ class _OrderCard extends StatelessWidget {
               }
               Navigator.pop(context, true);
             },
-            child: const Text('Yes, Return Order'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9800),
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Yes, Return Order', style: GoogleFonts.poppins()),
           ),
         ],
       ),
@@ -379,6 +414,7 @@ class _OrderCard extends StatelessWidget {
               success
                   ? 'Return request submitted successfully'
                   : 'Failed to submit return request',
+              style: GoogleFonts.poppins(),
             ),
             backgroundColor: success ? Colors.green : Colors.red,
           ),

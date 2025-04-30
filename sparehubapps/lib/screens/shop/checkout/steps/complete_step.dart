@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../models/order.dart';
 import '../../../../providers/order_provider.dart';
@@ -11,8 +12,15 @@ class CompleteStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final order = context.read<OrderProvider>().currentOrder;
     if (order == null) {
-      return const Center(
-        child: Text('No order information available'),
+      return Center(
+        child: Text(
+          'No order information available',
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[600],
+          ),
+        ),
       );
     }
 
@@ -31,37 +39,41 @@ class CompleteStep extends StatelessWidget {
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                          color: const Color(0xFFFF9800).withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.check_circle_outline,
                           size: 64,
-                          color: Theme.of(context).primaryColor,
+                          color: Color(0xFFFF9800),
                         ),
                       ),
                       const SizedBox(height: 24),
-                      const Text(
+                      Text(
                         'Order Placed Successfully!',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Order #${order.id}',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
                           color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
                         'Thank you for your order. We will send you a notification when your order is ready.',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
                           color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -75,16 +87,19 @@ class CompleteStep extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverToBoxAdapter(
                   child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Order Details',
-                            style: TextStyle(
+                            style: GoogleFonts.poppins(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -126,29 +141,46 @@ class CompleteStep extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverToBoxAdapter(
                   child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Delivery Address',
-                            style: TextStyle(
+                            style: GoogleFonts.poppins(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             order.shippingAddress.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(order.shippingAddress.phone),
+                          Text(
+                            order.shippingAddress.phone,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
                           const SizedBox(height: 8),
-                          Text(order.shippingAddress.formattedAddress),
+                          Text(
+                            order.shippingAddress.formattedAddress,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -166,7 +198,7 @@ class CompleteStep extends StatelessWidget {
             color: Theme.of(context).scaffoldBackgroundColor,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 10,
               ),
             ],
@@ -174,16 +206,29 @@ class CompleteStep extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacementNamed(context, '/shop/home');
                   },
-                  child: const Text('Continue Shopping'),
+                  style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                    foregroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
+                    side: MaterialStateProperty.all(
+                      const BorderSide(color: Color(0xFFFF9800)),
+                    ),
+                  ),
+                  child: Text(
+                    'Continue Shopping',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: FilledButton(
+                child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacementNamed(
                       context,
@@ -191,7 +236,17 @@ class CompleteStep extends StatelessWidget {
                       arguments: order.id,
                     );
                   },
-                  child: const Text('Track Order'),
+                  style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                    backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
+                  ),
+                  child: Text(
+                    'Track Order',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -207,15 +262,18 @@ class CompleteStep extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
+            fontSize: 14,
             color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
           ),
         ),
         Text(
           value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: color,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: color ?? Colors.black87,
           ),
         ),
       ],
@@ -235,9 +293,9 @@ class CompleteStep extends StatelessWidget {
       case OrderStatus.delivered:
         return Colors.green;
       case OrderStatus.cancelled:
-        return Colors.red;
+        return Colors.red[700]!;
       case OrderStatus.returned:
-        return Colors.red;
+        return Colors.red[700]!;
     }
   }
 
@@ -250,7 +308,7 @@ class CompleteStep extends StatelessWidget {
       case PaymentStatus.completed:
         return Colors.green;
       case PaymentStatus.failed:
-        return Colors.red;
+        return Colors.red[700]!;
       case PaymentStatus.refunded:
         return Colors.purple;
     }

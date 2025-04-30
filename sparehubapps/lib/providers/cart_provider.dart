@@ -1,147 +1,82 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/cart.dart';
 import '../models/product.dart';
+import '../models/cart.dart';
 
 class CartProvider with ChangeNotifier {
-  static const String _cartKey = 'cart_data';
   final SharedPreferences _prefs;
-  Cart _cart = const Cart();
+  Cart _cart = Cart(items: []);
   bool _isLoading = false;
   String? _error;
+  static const String _cartKey = 'cart_data';
 
   CartProvider(this._prefs) {
     _loadCart();
   }
 
-  // Getters
   Cart get cart => _cart;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isEmpty => _cart.items.isEmpty;
   List<CartItem> get items => _cart.items;
   double get total => _cart.total;
-  int get itemCount => _cart.itemCount;
-  bool get isEmpty => _cart.isEmpty;
-  bool get isNotEmpty => _cart.isNotEmpty;
 
-  // Load cart from SharedPreferences
   Future<void> _loadCart() async {
     try {
-      _isLoading = true;
+      _setLoading(true);
       _error = null;
-      notifyListeners();
 
       final cartJson = _prefs.getString(_cartKey);
       if (cartJson != null) {
-        _cart = Cart.fromJson(json.decode(cartJson));
+        final cartData = json.decode(cartJson) as Map<String, dynamic>;
+        final itemsData = cartData['items'] as List<dynamic>? ?? [];
+        final cartItems = itemsData.map((item) {
+          final itemData = item as Map<String, dynamic>;
+          final productData = itemData['product'] as Map<String, dynamic>;
+          return CartItem(
+            product: Product.fromJson({
+              ...productData,
+              'id': productData['id'].toString(), // Ensure ID is String
+            }),
+            quantity: itemData['quantity'] as int,
+          );
+        }).toList();
+        _cart = Cart(items: cartItems);
       }
     } catch (e) {
       debugPrint('Error loading cart: $e');
       _error = 'Failed to load cart';
-      // If there's an error loading the cart, start with an empty cart
-      _cart = const Cart();
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
-  // Refresh cart data
   Future<void> refreshCart() async {
     await _loadCart();
   }
 
-  // Save cart to SharedPreferences
-  Future<void> _saveCart() async {
-    try {
-      _error = null;
-      await _prefs.setString(_cartKey, json.encode(_cart.toJson()));
-    } catch (e) {
-      debugPrint('Error saving cart: $e');
-      _error = 'Failed to save cart';
-      notifyListeners();
-    }
-  }
-
-  void clearError() {
-    _error = null;
-    notifyListeners();
-  }
-
-  // Add item to cart
-  Future<void> addItem(Product product, {int quantity = 1}) async {
-    if (quantity <= 0) return;
-
-    // Check if adding this quantity would exceed available stock
-    final existingItem = _cart.items.firstWhere(
-          (item) => item.product.id == product.id,
-      orElse: () => CartItem(product: product, quantity: 0),
-    );
-
-    final newQuantity = existingItem.quantity + quantity;
-    if (newQuantity > product.stockQuantity) {
-      throw Exception('Cannot add more items than available in stock');
-    }
-
-    _cart = _cart.addItem(product, quantity: quantity);
-    notifyListeners();
-    await _saveCart();
-  }
-
-  // Update item quantity
-  Future<void> updateQuantity(String productId, int quantity) async {
-    if (quantity < 0) return;
-
-    final item = _cart.items.firstWhere(
-          (item) => item.product.id == productId,
-      orElse: () => throw Exception('Product not found in cart'),
-    );
-
-    if (quantity > item.product.stockQuantity) {
-      throw Exception('Cannot add more items than available in stock');
-    }
-
-    _cart = _cart.updateQuantity(productId, quantity);
-    notifyListeners();
-    await _saveCart();
-  }
-
-  // Remove item from cart
-  Future<void> removeItem(String productId) async {
-    _cart = _cart.removeItem(productId);
-    notifyListeners();
-    await _saveCart();
-  }
-
-  // Clear cart
-  Future<void> clear() async {
-    _cart = _cart.clear();
-    notifyListeners();
-    await _saveCart();
-  }
-
-  // Check if a product is in the cart
-  bool hasProduct(String productId) {
+  bool hasProduct(String? productId) {
+    if (productId == null) return false;
     return _cart.items.any((item) => item.product.id == productId);
   }
 
-  // Get quantity of a product in cart
-  int getQuantity(String productId) {
+  int getQuantity(String? productId) {
+    if (productId == null) return 0;
     final item = _cart.items.firstWhere(
-          (item) => item.product.id == productId,
+      (item) => item.product.id == productId,
       orElse: () => CartItem(
         product: Product(
-          id: productId,
+          id: '',
           name: '',
           description: '',
           sku: '',
           categoryId: 0,
           subcategoryId: 0,
           manufacturerId: 0,
-          price: 0,
+          price: 0.0,
           stockQuantity: 0,
-          weight: 0,
+          weight: 0.0,
         ),
         quantity: 0,
       ),
@@ -149,46 +84,155 @@ class CartProvider with ChangeNotifier {
     return item.quantity;
   }
 
-  // Validate cart items against current stock
-  List<String> validateStock() {
-    final List<String> outOfStockItems = [];
-
-    for (final item in _cart.items) {
-      if (item.quantity > item.product.stockQuantity) {
-        outOfStockItems.add(item.product.name);
-      }
-    }
-
-    return outOfStockItems;
-  }
-
-  // Calculate shipping cost
-  double calculateShippingCost() {
-    // TODO: Implement proper shipping cost calculation
-    return _cart.items.fold(
-      0,
-          (sum, item) => sum + (item.product.shippingCost * item.quantity),
-    );
-  }
-
-  // Calculate tax
-  double calculateTax() {
-    // TODO: Implement proper tax calculation
-    return _cart.total * 0.18; // 18% GST
-  }
-
-  // Get order summary
-  Map<String, double> getOrderSummary() {
+  Map<String, dynamic> getOrderSummary() {
     final subtotal = _cart.total;
-    final shipping = calculateShippingCost();
-    final tax = calculateTax();
+    const shipping = 50.0; // Placeholder: Adjust based on actual logic
+    const taxRate = 0.18; // 18% GST, adjust as needed
+    final tax = subtotal * taxRate;
     final total = subtotal + shipping + tax;
 
     return {
+      'items': _cart.items.map((item) => {
+            'productName': item.product.name,
+            'quantity': item.quantity,
+            'price': item.product.price,
+          }).toList(),
+      'itemCount': _cart.items.length,
       'subtotal': subtotal,
       'shipping': shipping,
       'tax': tax,
       'total': total,
     };
+  }
+
+  Future<void> addItem(Product product, {int quantity = 1}) async {
+    try {
+      _setLoading(true);
+      _error = null;
+
+      if (product.id == null) {
+        throw Exception('Product ID is null');
+      }
+
+      final existingItemIndex = _cart.items.indexWhere((item) => item.product.id == product.id);
+      if (existingItemIndex >= 0) {
+        _cart.items[existingItemIndex] = _cart.items[existingItemIndex].copyWith(
+          quantity: _cart.items[existingItemIndex].quantity + quantity,
+        );
+      } else {
+        _cart.items.add(CartItem(product: product, quantity: quantity));
+      }
+
+      await _saveCart();
+    } catch (e) {
+      debugPrint('Error adding item to cart: $e');
+      _error = 'Failed to add item to cart: $e';
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> updateQuantity(String productId, int quantity) async {
+    try {
+      _setLoading(true);
+      _error = null;
+
+      final itemIndex = _cart.items.indexWhere((item) => item.product.id == productId);
+      if (itemIndex >= 0) {
+        if (quantity <= 0) {
+          _cart.items.removeAt(itemIndex);
+        } else {
+          _cart.items[itemIndex] = _cart.items[itemIndex].copyWith(quantity: quantity);
+        }
+        await _saveCart();
+      }
+    } catch (e) {
+      debugPrint('Error updating cart quantity: $e');
+      _error = 'Failed to update cart';
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> removeItem(String productId) async {
+    try {
+      _setLoading(true);
+      _error = null;
+
+      _cart.items.removeWhere((item) => item.product.id == productId);
+      await _saveCart();
+    } catch (e) {
+      debugPrint('Error removing item from cart: $e');
+      _error = 'Failed to remove item from cart';
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> clear() async {
+    try {
+      _setLoading(true);
+      _error = null;
+
+      _cart = Cart(items: []);
+      await _saveCart();
+    } catch (e) {
+      debugPrint('Error clearing cart: $e');
+      _error = 'Failed to clear cart';
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _saveCart() async {
+    try {
+      final cartJson = json.encode({
+        'items': _cart.items.map((item) => {
+          'product': {
+            'id': item.product.id,
+            'name': item.product.name,
+            'price': item.product.price,
+            'discount': item.product.discount,
+            'stockQuantity': item.product.stockQuantity,
+            'images': item.product.images,
+            'categoryId': item.product.categoryId,
+            'brandId': item.product.brandId,
+            'isLowStock': item.product.isLowStock,
+            'isOutOfStock': item.product.isOutOfStock,
+            'createdAt': item.product.createdAt?.toIso8601String(),
+            'updatedAt': item.product.updatedAt?.toIso8601String(),
+            'minOrderQuantity': item.product.minOrderQuantity,
+            'maxOrderQuantity': item.product.maxOrderQuantity,
+            'isApproved': item.product.isApproved,
+            'isActive': item.product.isActive,
+            'isFeatured': item.product.isFeatured,
+            'sku': item.product.sku,
+            'description': item.product.description,
+            'technicalSpecificationPdf': item.product.technicalSpecificationPdf,
+            'installationGuidePdf': item.product.installationGuidePdf,
+            'weight': item.product.weight,
+            'dimensions': item.product.dimensions,
+            'material': item.product.material,
+            'color': item.product.color,
+            'shippingCost': item.product.shippingCost,
+            'shippingTime': item.product.shippingTime,
+            'originCountry': item.product.originCountry,
+            'subcategoryId': item.product.subcategoryId,
+            'manufacturerId': item.product.manufacturerId,
+          },
+          'quantity': item.quantity,
+        }).toList(),
+      });
+      await _prefs.setString(_cartKey, cartJson);
+    } catch (e) {
+      debugPrint('Error saving cart: $e');
+      _error = 'Failed to save cart';
+    }
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
   }
 }

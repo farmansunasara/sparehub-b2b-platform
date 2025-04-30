@@ -166,8 +166,8 @@ class OrderPayment {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'method': method.toString(),
-      'status': status.toString(),
+      'method': method.toString().split('.').last,
+      'status': status.toString().split('.').last,
       'amount': amount,
       'transaction_id': transactionId,
       'timestamp': timestamp.toIso8601String(),
@@ -177,14 +177,16 @@ class OrderPayment {
 
   factory OrderPayment.fromJson(Map<String, dynamic> json) {
     return OrderPayment(
-      id: json['id'],
+      id: json['id'].toString(),
       method: PaymentMethod.values.firstWhere(
-            (e) => e.toString() == json['method'],
+            (e) => e.toString().split('.').last == json['method'].toLowerCase(),
+        orElse: () => PaymentMethod.cod,
       ),
       status: PaymentStatus.values.firstWhere(
-            (e) => e.toString() == json['status'],
+            (e) => e.toString().split('.').last == json['status'].toLowerCase(),
+        orElse: () => PaymentStatus.pending,
       ),
-      amount: json['amount'].toDouble(),
+      amount: (json['amount'] as num).toDouble(),
       transactionId: json['transaction_id'],
       timestamp: DateTime.parse(json['timestamp']),
       metadata: json['metadata'],
@@ -239,7 +241,7 @@ class OrderPayment {
 class Order {
   final String id;
   final String userId;
-  final String shopName;  // Add shopName field
+  final String shopName;
   final List<CartItem> items;
   final OrderAddress shippingAddress;
   final OrderAddress? billingAddress;
@@ -277,47 +279,44 @@ class Order {
     return {
       'id': id,
       'user_id': userId,
-      'shop_name': shopName,  // Add shopName to JSON
+      'shop_name': shopName,
       'items': items.map((item) => item.toJson()).toList(),
       'shipping_address': shippingAddress.toJson(),
       'billing_address': billingAddress?.toJson(),
       'payment': payment.toJson(),
-      'status': status.toString(),
+      'status': status.toString().split('.').last,
       'subtotal': subtotal,
       'tax': tax,
       'shipping_cost': shippingCost,
       'total': total,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
-      'status_updates':
-      statusUpdates.map((update) => update.toJson()).toList(),
+      'status_updates': statusUpdates.map((update) => update.toJson()).toList(),
       'metadata': metadata,
     };
   }
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      id: json['id'],
-      userId: json['user_id'],
-      shopName: json['shop_name'] ?? 'Unknown Shop',  // Add shopName with default
-      items: (json['items'] as List)
-          .map((item) => CartItem.fromJson(item))
-          .toList(),
+      id: json['id'].toString(),
+      userId: json['user_id'].toString(),
+      shopName: json['shop_name'] ?? 'Unknown Shop',
+      items: (json['items'] as List).map((item) => CartItem.fromJson(item)).toList(),
       shippingAddress: OrderAddress.fromJson(json['shipping_address']),
       billingAddress: json['billing_address'] != null
           ? OrderAddress.fromJson(json['billing_address'])
           : null,
       payment: OrderPayment.fromJson(json['payment']),
-      status: OrderStatus.values
-          .firstWhere((e) => e.toString() == json['status']),
-      subtotal: json['subtotal'].toDouble(),
-      tax: json['tax'].toDouble(),
-      shippingCost: json['shipping_cost'].toDouble(),
-      total: json['total'].toDouble(),
+      status: OrderStatus.values.firstWhere(
+            (e) => e.toString().split('.').last.toLowerCase() == json['status'].toString().toLowerCase(),
+        orElse: () => OrderStatus.pending,
+      ),
+      subtotal: (json['subtotal'] as num).toDouble(),
+      tax: (json['tax'] as num).toDouble(),
+      shippingCost: (json['shipping_cost'] as num).toDouble(),
+      total: (json['total'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
-          : null,
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       statusUpdates: (json['status_updates'] as List)
           .map((update) => OrderStatusUpdate.fromJson(update))
           .toList(),
@@ -369,6 +368,7 @@ class Order {
     return other is Order &&
         other.id == id &&
         other.userId == userId &&
+        other.shopName == shopName &&
         listEquals(other.items, items) &&
         other.shippingAddress == shippingAddress &&
         other.billingAddress == billingAddress &&
@@ -388,6 +388,7 @@ class Order {
   int get hashCode {
     return id.hashCode ^
     userId.hashCode ^
+    shopName.hashCode ^
     items.hashCode ^
     shippingAddress.hashCode ^
     billingAddress.hashCode ^
@@ -414,8 +415,7 @@ class Order {
   String get paymentMethodText => payment.method.toString().split('.').last;
   String get paymentStatusText => payment.status.toString().split('.').last;
 
-  bool get canCancel =>
-      status == OrderStatus.pending || status == OrderStatus.confirmed;
+  bool get canCancel => status == OrderStatus.pending || status == OrderStatus.confirmed;
   bool get canReturn => status == OrderStatus.delivered;
   bool get isCompleted => status == OrderStatus.delivered;
   bool get isCancelled => status == OrderStatus.cancelled;
@@ -435,7 +435,7 @@ class OrderStatusUpdate {
 
   Map<String, dynamic> toJson() {
     return {
-      'status': status.toString(),
+      'status': status.toString().split('.').last,
       'comment': comment,
       'timestamp': timestamp.toIso8601String(),
     };
@@ -443,8 +443,10 @@ class OrderStatusUpdate {
 
   factory OrderStatusUpdate.fromJson(Map<String, dynamic> json) {
     return OrderStatusUpdate(
-      status:
-      OrderStatus.values.firstWhere((e) => e.toString() == json['status']),
+      status: OrderStatus.values.firstWhere(
+            (e) => e.toString().split('.').last.toLowerCase() == json['status'].toString().toLowerCase(),
+        orElse: () => OrderStatus.pending,
+      ),
       comment: json['comment'],
       timestamp: DateTime.parse(json['timestamp']),
     );

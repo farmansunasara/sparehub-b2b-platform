@@ -1,11 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:logger/logger.dart';
 
-class RoleSelectionScreen extends StatelessWidget {
+class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
 
   @override
+  State<RoleSelectionScreen> createState() => _RoleSelectionScreenState();
+}
+
+class _RoleSelectionScreenState extends State<RoleSelectionScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  final Logger _logger = Logger();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _navigateTo(String route) async {
+    try {
+      Navigator.pushNamed(context, route);
+      _logger.i('Navigated to: $route');
+    } catch (e) {
+      _logger.e('Navigation error to $route: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error navigating: $e',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.red,
+          action: SnackBarAction(
+            label: 'Retry',
+            textColor: Colors.white,
+            onPressed: () => _navigateTo(route),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _navigateToLogin() async {
+    try {
+      Navigator.pushReplacementNamed(context, '/auth/login');
+      _logger.i('Navigated to login');
+    } catch (e) {
+      _logger.e('Navigation error to login: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error navigating: $e',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.red,
+          action: SnackBarAction(
+            label: 'Retry',
+            textColor: Colors.white,
+            onPressed: _navigateToLogin,
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Get the screen height to calculate dynamic padding
+    final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final topPadding = screenHeight * 0.08; // 8% of screen height
     final bottomPadding = screenHeight * 0.05; // 5% of screen height
@@ -22,67 +100,91 @@ class RoleSelectionScreen extends StatelessWidget {
             ),
             child: Padding(
               padding: EdgeInsets.fromLTRB(24.0, topPadding, 24.0, bottomPadding),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Image.asset(
-                      'assets/logos/sparehub_ic_logo.png',
-                      height: screenHeight * 0.15, // 15% of screen height
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.04), // 4% of screen height
-                  Text(
-                    'Choose Your Role',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Select how you want to use SpareHub',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: screenHeight * 0.06), // 6% of screen height
-                  _buildRoleCard(
-                    context,
-                    title: 'Manufacturer',
-                    description: 'List your products and reach thousands of auto parts retailers',
-                    icon: Icons.factory_outlined,
-                    onTap: () => Navigator.pushNamed(context, '/auth/manufacturer'),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildRoleCard(
-                    context,
-                    title: 'Shop Owner',
-                    description: 'Source quality spare parts directly from manufacturers',
-                    icon: Icons.store_outlined,
-                    onTap: () => Navigator.pushNamed(context, '/auth/shop'),
-                  ),
-                  SizedBox(height: screenHeight * 0.06), // 6% of screen height
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Already have an account?',
-                        style: TextStyle(color: Colors.grey[600]),
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Semantics(
+                        label: 'SpareHub Logo',
+                        child: Image.asset(
+                          'assets/logos/sparehub_ic_logo.png',
+                          height: screenHeight * 0.15,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            _logger.e('Failed to load logo: $error');
+                            return Icon(
+                              Icons.storefront,
+                              size: screenHeight * 0.15,
+                              color: theme.primaryColor,
+                            );
+                          },
+                        ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/auth/login');
-                        },
-                        child: const Text('Login'),
+                    ),
+                    SizedBox(height: screenHeight * 0.04),
+                    Text(
+                      'Join SpareHub',
+                      style: GoogleFonts.poppins(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: theme.primaryColor,
                       ),
-                    ],
-                  ),
-                ],
+                      textAlign: TextAlign.center,
+                      semanticsLabel: 'Join SpareHub',
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Select your role to get started',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                      textAlign: TextAlign.center,
+                      semanticsLabel: 'Select your role to get started',
+                    ),
+                    SizedBox(height: screenHeight * 0.06),
+                    _buildRoleCard(
+                      context,
+                      title: 'Manufacturer',
+                      description: 'List your products and reach thousands of auto parts retailers',
+                      icon: Icons.factory_outlined,
+                      onTap: () => _navigateTo('/auth/manufacturer'),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildRoleCard(
+                      context,
+                      title: 'Shop Owner',
+                      description: 'Source quality spare parts directly from manufacturers',
+                      icon: Icons.store_outlined,
+                      onTap: () => _navigateTo('/auth/shop'),
+                    ),
+                    SizedBox(height: screenHeight * 0.06),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Already have an account?',
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _navigateToLogin,
+                          child: Text(
+                            'Login',
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFFFF9800),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -92,19 +194,24 @@ class RoleSelectionScreen extends StatelessWidget {
   }
 
   Widget _buildRoleCard(
-      BuildContext context, {
-        required String title,
-        required String description,
-        required IconData icon,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required String title,
+    required String description,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
+      elevation: theme.cardTheme.elevation ?? 2,
+      shape: theme.cardTheme.shape ?? RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+      color: theme.cardTheme.color ?? Colors.white,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          _logger.i('Role selected: $title');
+          onTap();
+        },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -113,13 +220,16 @@ class RoleSelectionScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: const Color(0xFFFF9800).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: Theme.of(context).primaryColor,
+                child: Semantics(
+                  label: '$title icon',
+                  child: Icon(
+                    icon,
+                    size: 28,
+                    color: const Color(0xFFFF9800),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -129,14 +239,17 @@ class RoleSelectionScreen extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: theme.primaryColor,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
                         color: Colors.grey[600],
                       ),
                       maxLines: 2,
@@ -145,9 +258,12 @@ class RoleSelectionScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[400],
+              Semantics(
+                label: 'Select $title',
+                child: Icon(
+                  Icons.chevron_right,
+                  color: Colors.grey[400],
+                ),
               ),
             ],
           ),

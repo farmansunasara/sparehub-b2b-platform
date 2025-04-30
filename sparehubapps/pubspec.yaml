@@ -9,28 +9,34 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.2
-  provider: ^6.0.5
-  http: ^1.1.0
-  shared_preferences: ^2.2.0
-  image_picker: ^1.0.4
-  cached_network_image: ^3.3.0
-  flutter_svg: ^2.0.7
-  intl: ^0.18.1
-  url_launcher: ^6.1.14  # For opening PDFs in browser/viewer
-  flutter_secure_storage: ^9.0.0
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.2
+  http: ^1.2.2
+  shared_preferences: ^2.3.0
+  image_picker: ^1.1.2
+  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.10+1
+  intl: ^0.19.0
+  url_launcher: ^6.3.0
+  flutter_secure_storage: ^9.2.2
   shimmer: ^3.0.0
-  connectivity_plus: ^5.0.1
-  fl_chart: ^0.63.0  # Updated to latest version
-  logger: ^2.0.2  # For logging API calls and errors
-  path: ^1.8.3
-  path_provider: ^2.1.1
+  connectivity_plus: ^6.0.5
+  fl_chart: ^0.68.0
+  logger: ^2.4.0
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  google_fonts: ^6.2.1
+  carousel_slider: ^5.0.0
+  file_picker: ^8.0.7
+  json_annotation: ^4.8.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
-  mockito: ^5.4.2
-  build_runner: ^2.4.6  # Required for generating mock classes
+  flutter_lints: ^4.0.0
+  mockito: ^5.4.4
+  build_runner: ^2.4.11
+  json_serializable: ^6.7.1
 
 flutter:
   uses-material-design: true

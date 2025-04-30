@@ -1,6 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'order.dart'; // Import OrderAddress
 
-import 'order.dart';
+part 'address.g.dart';
 
 enum AddressType {
   home,
@@ -8,26 +9,34 @@ enum AddressType {
   other,
 }
 
+@JsonSerializable()
 class Address {
   final String? id;
-  final String userId;
+  @JsonKey(name: 'user_id')
+  final String? userId; // Matches Django's user_id or user
   final String name;
   final String phone;
+  @JsonKey(name: 'address_line1')
   final String addressLine1;
+  @JsonKey(name: 'address_line2')
   final String? addressLine2;
   final String city;
   final String state;
   final String pincode;
   final String country;
+  @JsonKey(fromJson: _addressTypeFromJson, toJson: _addressTypeToJson)
   final AddressType type;
+  @JsonKey(name: 'is_default')
   final bool isDefault;
   final Map<String, dynamic>? metadata;
+  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
+  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
 
-  const Address({
+  Address({
     this.id,
-    required this.userId,
+    this.userId,
     required this.name,
     required this.phone,
     required this.addressLine1,
@@ -36,59 +45,15 @@ class Address {
     required this.state,
     required this.pincode,
     required this.country,
-    this.type = AddressType.home,
-    this.isDefault = false,
+    required this.type,
+    required this.isDefault,
     this.metadata,
     this.createdAt,
     this.updatedAt,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'user_id': userId,
-      'name': name,
-      'phone': phone,
-      'address_line1': addressLine1,
-      'address_line2': addressLine2,
-      'city': city,
-      'state': state,
-      'pincode': pincode,
-      'country': country,
-      'type': type.toString(),
-      'is_default': isDefault,
-      'metadata': metadata,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
-    };
-  }
-
-  factory Address.fromJson(Map<String, dynamic> json) {
-    return Address(
-      id: json['id'],
-      userId: json['user_id'],
-      name: json['name'],
-      phone: json['phone'],
-      addressLine1: json['address_line1'],
-      addressLine2: json['address_line2'],
-      city: json['city'],
-      state: json['state'],
-      pincode: json['pincode'],
-      country: json['country'],
-      type: AddressType.values.firstWhere(
-        (e) => e.toString() == json['type'],
-        orElse: () => AddressType.home,
-      ),
-      isDefault: json['is_default'] ?? false,
-      metadata: json['metadata'],
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
-          : null,
-    );
-  }
+  factory Address.fromJson(Map<String, dynamic> json) => _$AddressFromJson(json);
+  Map<String, dynamic> toJson() => _$AddressToJson(this);
 
   Address copyWith({
     String? id,
@@ -126,66 +91,6 @@ class Address {
     );
   }
 
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Address &&
-        other.id == id &&
-        other.userId == userId &&
-        other.name == name &&
-        other.phone == phone &&
-        other.addressLine1 == addressLine1 &&
-        other.addressLine2 == addressLine2 &&
-        other.city == city &&
-        other.state == state &&
-        other.pincode == pincode &&
-        other.country == country &&
-        other.type == type &&
-        other.isDefault == isDefault &&
-        mapEquals(other.metadata, metadata) &&
-        other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        userId.hashCode ^
-        name.hashCode ^
-        phone.hashCode ^
-        addressLine1.hashCode ^
-        addressLine2.hashCode ^
-        city.hashCode ^
-        state.hashCode ^
-        pincode.hashCode ^
-        country.hashCode ^
-        type.hashCode ^
-        isDefault.hashCode ^
-        metadata.hashCode ^
-        createdAt.hashCode ^
-        updatedAt.hashCode;
-  }
-
-  String get formattedAddress {
-    final parts = [
-      addressLine1,
-      if (addressLine2?.isNotEmpty ?? false) addressLine2,
-      city,
-      state,
-      pincode,
-      country,
-    ].where((part) => part != null && part.isNotEmpty).join(', ');
-
-    return '$name\n$parts\nPhone: $phone';
-  }
-
-  String get typeText => type.toString().split('.').last;
-
-  bool get isHomeAddress => type == AddressType.home;
-  bool get isWorkAddress => type == AddressType.work;
-  bool get isOtherAddress => type == AddressType.other;
-
-  // Convert to OrderAddress
   OrderAddress toOrderAddress() {
     return OrderAddress(
       name: name,
@@ -196,7 +101,30 @@ class Address {
       state: state,
       pincode: pincode,
       country: country,
-      isDefault: isDefault,
     );
+  }
+
+  static AddressType _addressTypeFromJson(String json) {
+    switch (json) {
+      case 'home':
+        return AddressType.home;
+      case 'work':
+        return AddressType.work;
+      case 'other':
+        return AddressType.other;
+      default:
+        throw ArgumentError('Invalid address type: $json');
+    }
+  }
+
+  static String _addressTypeToJson(AddressType type) {
+    switch (type) {
+      case AddressType.home:
+        return 'home';
+      case AddressType.work:
+        return 'work';
+      case AddressType.other:
+        return 'other';
+    }
   }
 }

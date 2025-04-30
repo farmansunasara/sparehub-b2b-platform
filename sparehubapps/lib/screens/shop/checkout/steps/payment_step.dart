@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../models/order.dart';
 import '../../../../providers/checkout_provider.dart';
@@ -23,14 +24,15 @@ class PaymentStep extends StatelessWidget {
               child: CustomScrollView(
                 slivers: [
                   // Payment Methods
-                  const SliverPadding(
-                    padding: EdgeInsets.all(16),
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
                     sliver: SliverToBoxAdapter(
                       child: Text(
                         'Select Payment Method',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
                         ),
                       ),
                     ),
@@ -92,14 +94,15 @@ class PaymentStep extends StatelessWidget {
                   ),
 
                   // Order Summary
-                  const SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     sliver: SliverToBoxAdapter(
                       child: Text(
                         'Order Summary',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
                         ),
                       ),
                     ),
@@ -109,6 +112,8 @@ class PaymentStep extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     sliver: SliverToBoxAdapter(
                       child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
@@ -150,7 +155,7 @@ class PaymentStep extends StatelessWidget {
                 color: Theme.of(context).scaffoldBackgroundColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 10,
                   ),
                 ],
@@ -168,18 +173,25 @@ class PaymentStep extends StatelessWidget {
   }
 
   Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
-    final style = isTotal
-        ? const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          )
-        : const TextStyle(fontSize: 16);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: style),
-        Text(value, style: style),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: isTotal ? 18 : 16,
+            fontWeight: isTotal ? FontWeight.w600 : FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: isTotal ? 18 : 16,
+            fontWeight: isTotal ? FontWeight.w600 : FontWeight.w500,
+            color: isTotal ? const Color(0xFFFF9800) : Colors.black87,
+          ),
+        ),
       ],
     );
   }
@@ -208,13 +220,15 @@ class _PaymentMethodCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onSelect,
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             border: Border.all(
-              color: isSelected ? theme.primaryColor : Colors.grey[300]!,
+              color: isSelected ? const Color(0xFFFF9800) : Colors.grey[300]!,
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -225,12 +239,13 @@ class _PaymentMethodCard extends StatelessWidget {
                 value: true,
                 groupValue: isSelected,
                 onChanged: (_) => onSelect(),
+                activeColor: const Color(0xFFFF9800),
               ),
               const SizedBox(width: 8),
               Icon(
                 icon,
                 size: 28,
-                color: isSelected ? theme.primaryColor : Colors.grey[600],
+                color: isSelected ? const Color(0xFFFF9800) : Colors.grey[600],
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -239,17 +254,18 @@ class _PaymentMethodCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? theme.primaryColor : null,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? const Color(0xFFFF9800) : Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        color: Colors.grey[600],
+                      style: GoogleFonts.poppins(
                         fontSize: 12,
+                        color: Colors.grey[600],
                       ),
                     ),
                   ],

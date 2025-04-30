@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../models/order.dart';
 import '../../../providers/checkout_provider.dart';
@@ -12,6 +13,7 @@ class CheckoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return WillPopScope(
       onWillPop: () async {
         final checkoutProvider = context.read<CheckoutProvider>();
@@ -23,12 +25,21 @@ class CheckoutScreen extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Checkout'),
+          title: Text(
+            'Checkout',
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: const Color(0xFF1976D2),
+          elevation: 4,
           leading: Builder(
             builder: (context) {
               final checkoutProvider = context.watch<CheckoutProvider>();
               return IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
                   if (checkoutProvider.currentStep == CheckoutStep.address) {
                     Navigator.pop(context);
@@ -120,31 +131,30 @@ class CheckoutScreen extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isCompleted
-                  ? theme.primaryColor
+                  ? const Color(0xFFFF9800)
                   : isActive
-                      ? theme.primaryColor.withOpacity(0.1)
+                      ? const Color(0xFFFF9800).withOpacity(0.1)
                       : Colors.grey[200],
               border: Border.all(
                 color: isCompleted || isActive
-                    ? theme.primaryColor
+                    ? const Color(0xFFFF9800)
                     : Colors.grey[400]!,
                 width: 2,
               ),
             ),
             child: Center(
               child: isCompleted
-                  ? Icon(
+                  ? const Icon(
                       Icons.check,
-                      color: theme.colorScheme.onPrimary,
+                      color: Colors.white,
                       size: 16,
                     )
                   : Text(
                       (step.index + 1).toString(),
-                      style: TextStyle(
-                        color: isActive
-                            ? theme.primaryColor
-                            : Colors.grey[600],
+                      style: GoogleFonts.poppins(
+                        color: isActive ? const Color(0xFFFF9800) : Colors.grey[600],
                         fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
                     ),
             ),
@@ -152,9 +162,10 @@ class CheckoutScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(
-              color: isActive ? theme.primaryColor : Colors.grey[600],
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            style: GoogleFonts.poppins(
+              color: isActive ? const Color(0xFFFF9800) : Colors.grey[600],
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              fontSize: 12,
             ),
           ),
         ],
@@ -166,9 +177,7 @@ class CheckoutScreen extends StatelessWidget {
     return Expanded(
       child: Container(
         height: 2,
-        color: isCompleted
-            ? Theme.of(context).primaryColor
-            : Colors.grey[300],
+        color: isCompleted ? const Color(0xFFFF9800) : Colors.grey[300],
       ),
     );
   }
@@ -202,20 +211,21 @@ class CheckoutErrorBanner extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      color: Colors.red[100],
+      color: Colors.red[50],
       child: Row(
         children: [
           Icon(
             Icons.error_outline,
-            color: Colors.red[900],
+            color: Colors.red[700],
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                color: Colors.red[900],
+              style: GoogleFonts.poppins(
+                color: Colors.red[700],
                 fontWeight: FontWeight.w500,
+                fontSize: 14,
               ),
             ),
           ),
@@ -223,7 +233,7 @@ class CheckoutErrorBanner extends StatelessWidget {
             IconButton(
               icon: Icon(
                 Icons.close,
-                color: Colors.red[900],
+                color: Colors.red[700],
               ),
               onPressed: onDismiss,
             ),
@@ -249,11 +259,19 @@ class CheckoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: double.infinity,
       height: 48,
-      child: FilledButton(
+      child: ElevatedButton(
         onPressed: enabled && !isLoading ? onPressed : null,
+        style: theme.elevatedButtonTheme.style?.copyWith(
+          backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
+          foregroundColor: MaterialStateProperty.all(Colors.white),
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
         child: isLoading
             ? const SizedBox(
                 width: 24,
@@ -263,7 +281,13 @@ class CheckoutButton extends StatelessWidget {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : Text(label),
+            : Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }

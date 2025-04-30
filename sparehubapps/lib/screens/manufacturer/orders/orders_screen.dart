@@ -25,7 +25,10 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    _loadData();
+    // Defer data loading to after the build phase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
   }
 
   Future<void> _loadData() async {
@@ -66,29 +69,33 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
     );
 
     return Scaffold(
-      appBar: widget.showAppBar ? AppBar(
-        title: const Text('Orders'),
-        bottom: tabBar,
-      ) : PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Material(
-          elevation: 4,
-          child: tabBar,
-        ),
-      ),
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('Orders'),
+              bottom: tabBar,
+            )
+          : PreferredSize(
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+              child: Material(
+                elevation: 4,
+                child: tabBar,
+              ),
+            ),
       body: LoadingOverlay(
         isLoading: _isLoading,
         child: RefreshIndicator(
           onRefresh: _loadData,
           child: Consumer<ManufacturerProvider>(
             builder: (context, provider, child) {
+              if (provider.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
               if (provider.error != null) {
                 return ErrorView(
                   message: provider.error!,
                   onRetry: _loadData,
                 );
               }
-
               return TabBarView(
                 controller: _tabController,
                 children: [
@@ -142,8 +149,8 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
                       Text(
                         'Order #${order.id}',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       _buildOrderStatusChip(order.status),
                     ],
@@ -163,14 +170,14 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Divider(),
+                  const Divider(),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         '${order.items.length} ${order.items.length == 1 ? 'item' : 'items'}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -244,6 +251,6 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
 
 extension StringExtension on String {
   String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

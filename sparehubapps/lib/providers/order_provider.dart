@@ -1,286 +1,179 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/order.dart';
 import '../models/cart.dart';
-import '../models/address.dart';
 import '../services/api_service.dart';
-import '../providers/auth_provider.dart';
 
-class OrderProvider with ChangeNotifier {
-  static const String _ordersKey = 'user_orders';
-
+class OrderProvider extends ChangeNotifier {
   final ApiService _apiService;
-  final SharedPreferences _prefs;
-  final AuthProvider _authProvider;
-
   List<Order> _orders = [];
   Order? _currentOrder;
   bool _isLoading = false;
   String? _error;
+  bool _hasMoreOrders = true;
+  int _currentPage = 1;
+  static const int _pageSize = 5;
 
-  OrderProvider(this._apiService, this._prefs, this._authProvider) {
-    _loadOrders();
-  }
+  OrderProvider(this._apiService);
 
-  // Getters
   List<Order> get orders => _orders;
   Order? get currentOrder => _currentOrder;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get hasMoreOrders => _hasMoreOrders;
 
-  List<Order> get pendingOrders => _orders.where((order) =>
-  order.status == OrderStatus.pending ||
-      order.status == OrderStatus.confirmed
-  ).toList();
+  List<Order> get pendingOrders => _orders.where((order) {
+    return [
+      OrderStatus.pending,
+      OrderStatus.confirmed,
+      OrderStatus.processing,
+      OrderStatus.shipped
+    ].contains(order.status);
+  }).toList();
 
-  List<Order> get completedOrders => _orders.where((order) =>
-  order.status == OrderStatus.delivered
-  ).toList();
+  List<Order> get completedOrders => _orders.where((order) {
+    return [
+      OrderStatus.delivered,
+      OrderStatus.cancelled,
+      OrderStatus.returned
+    ].contains(order.status);
+  }).toList();
 
-  // Load orders from storage
-  Future<void> _loadOrders() async {
+  Future<void> refreshOrders({bool reset = false}) async {
+    if (_isLoading) return;
+    if (reset) {
+      _currentPage = 1;
+      _orders = [];
+      _hasMoreOrders = true;
+    }
+    _setLoading(true);
     try {
-      final ordersJson = _prefs.getString(_ordersKey);
-      if (ordersJson != null) {
-        final List<dynamic> ordersList = json.decode(ordersJson);
-        _orders = ordersList.map((json) => Order.fromJson(json)).toList();
-        notifyListeners();
+      final response = await _apiService.getShopOrders(limit: _pageSize);
+      final newOrders = response.map((json) => Order.fromJson(json)).toList();
+      if (newOrders.length < _pageSize) {
+        _hasMoreOrders = false;
       }
+      _orders = reset ? newOrders : [..._orders, ...newOrders];
+      _error = null;
+      _currentPage++;
     } catch (e) {
-      debugPrint('Error loading orders: $e');
-      _error = 'Failed to load orders';
-      notifyListeners();
+      _error = e.toString();
+    } finally {
+      _setLoading(false);
     }
   }
 
-  // Save orders to storage
-  Future<void> _saveOrders() async {
-    try {
-      final ordersJson = json.encode(_orders.map((order) => order.toJson()).toList());
-      await _prefs.setString(_ordersKey, ordersJson);
-    } catch (e) {
-      debugPrint('Error saving orders: $e');
-      _error = 'Failed to save orders';
-      notifyListeners();
-    }
-  }
-
-  // Create new order from cart
   Future<Order?> createOrder({
     required Cart cart,
-    required Address shippingAddress,
-    Address? billingAddress,
+    required OrderAddress shippingAddress,
+    OrderAddress? billingAddress,
     required PaymentMethod paymentMethod,
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      _isLoading = true;
+      _setLoading(true);
       _error = null;
-      notifyListeners();
 
-      // Calculate order totals
-      final subtotal = cart.total;
-      final tax = subtotal * 0.18; // 18% GST
-      final shippingCost = cart.items.fold<double>(
-        0,
-            (sum, item) => sum + (item.product.shippingCost * item.quantity),
-      );
-      final total = subtotal + tax + shippingCost;
+      final orderData = {
+        'items': cart.items.map((item) => {
+          'product': item.product.id,
+          'quantity': item.quantity,
+        }).toList(),
+        'shipping_address': {
+          'name': shippingAddress.name,
+          'phone': shippingAddress.phone,
+          'address': shippingAddress.formattedAddress,
+        },
+        if (billingAddress != null)
+          'billing_address': {
+            'name': billingAddress.name,
+            'phone': billingAddress.phone,
+            'address': billingAddress.formattedAddress,
+          },
+        'payment_method': paymentMethod.toString().split('.').last,
+        if (metadata != null) 'metadata': metadata,
+      };
 
-      // Create payment record
-      final payment = OrderPayment(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        method: paymentMethod,
-        status: PaymentStatus.pending,
-        amount: total,
-        timestamp: DateTime.now(),
-      );
-
-      // Create order
-      final order = Order(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: _authProvider.currentUser?.id.toString() ?? 'unknown_user',
-        shopName: _authProvider.currentUser?.name ?? 'Unknown Shop',
-        items: cart.items,
-        shippingAddress: shippingAddress.toOrderAddress(),
-        billingAddress: billingAddress?.toOrderAddress(),
-        payment: payment,
-        status: OrderStatus.pending,
-        subtotal: subtotal,
-        tax: tax,
-        shippingCost: shippingCost,
-        total: total,
-        createdAt: DateTime.now(),
-        statusUpdates: [
-          OrderStatusUpdate(
-            status: OrderStatus.pending,
-            comment: 'Order placed',
-            timestamp: DateTime.now(),
-          ),
-        ],
-        metadata: metadata,
-      );
-
-      // Save to API
-      final response = await _apiService.createOrder(order.toJson());
-      final createdOrder = Order.fromJson(response);
-      _orders.add(createdOrder);
-      _currentOrder = createdOrder;
-      await _saveOrders();
-      notifyListeners();
-      return createdOrder;
-    } on ApiException catch (e) {
-      debugPrint('API Error creating order: ${e.message}');
-      _error = e.message;
-      notifyListeners();
-      return null;
+      final response = await _apiService.createOrder(orderData);
+      final order = Order.fromJson(response);
+      _currentOrder = order;
+      _orders = [order, ..._orders];
+      return order;
     } catch (e) {
-      debugPrint('Error creating order: $e');
-      _error = 'Failed to create order';
-      notifyListeners();
+      _error = e.toString();
       return null;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
-  // Update order status
-  Future<bool> updateOrderStatus(String orderId, OrderStatus newStatus, {String? comment}) async {
-    try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
-
-      final orderIndex = _orders.indexWhere((order) => order.id == orderId);
-      if (orderIndex == -1) {
-        throw Exception('Order not found');
-      }
-
-      // Update in API
-      final response = await _apiService.updateOrderStatus(
-          orderId,
-          newStatus.toString().split('.').last,
-          comment: comment
-      );
-      final serverUpdatedOrder = Order.fromJson(response);
-      _orders[orderIndex] = serverUpdatedOrder;
-      if (_currentOrder?.id == orderId) {
-        _currentOrder = serverUpdatedOrder;
-      }
-      await _saveOrders();
-      notifyListeners();
-      return true;
-    } on ApiException catch (e) {
-      debugPrint('API Error updating order status: ${e.message}');
-      _error = e.message;
-      notifyListeners();
-      return false;
-    } catch (e) {
-      debugPrint('Error updating order status: $e');
-      _error = 'Failed to update order status';
-      notifyListeners();
-      return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  // Cancel order
-  Future<bool> cancelOrder(String orderId, {String? reason}) async {
-    return updateOrderStatus(
-      orderId,
-      OrderStatus.cancelled,
-      comment: reason,
-    );
-  }
-
-  // Return order
-  Future<bool> returnOrder(String orderId, {String? reason}) async {
-    return updateOrderStatus(
-      orderId,
-      OrderStatus.returned,
-      comment: reason,
-    );
-  }
-
-  // Get order by ID
   Future<Order?> getOrderById(String orderId) async {
     try {
-      final response = await _apiService.getOrder(orderId);
-      return Order.fromJson(response);
-    } on ApiException catch (e) {
-      debugPrint('API Error getting order: ${e.message}');
-      _error = e.message;
-      notifyListeners();
-      return null;
-    } catch (e) {
-      debugPrint('Error getting order: $e');
-      _error = 'Failed to get order';
-      notifyListeners();
-      return null;
-    }
-  }
-
-  // Get cached order by ID
-  Order? getCachedOrderById(String orderId) {
-    try {
-      return _orders.firstWhere((order) => order.id == orderId);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  // Refresh orders from API
-  Future<void> refreshOrders() async {
-    try {
-      _isLoading = true;
+      _setLoading(true);
       _error = null;
-      notifyListeners();
 
-      final ordersList = await _apiService.getOrders();
-      _orders = ordersList.map((json) => Order.fromJson(json)).toList();
-      await _saveOrders();
-    } on ApiException catch (e) {
-      debugPrint('API Error refreshing orders: ${e.message}');
-      _error = e.message;
+      final response = await _apiService.getOrder(orderId);
+      final order = Order.fromJson(response);
+      return order;
     } catch (e) {
-      debugPrint('Error refreshing orders: $e');
-      _error = 'Failed to refresh orders';
+      _error = e.toString();
+      return null;
     } finally {
-      _isLoading = false;
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> cancelOrder(String orderId, {String? reason}) async {
+    try {
+      _setLoading(true);
+      _error = null;
+
+      await _apiService.updateOrderStatus(
+        orderId,
+        OrderStatus.cancelled.toString().split('.').last,
+        comment: reason,
+      );
+      await refreshOrders(reset: true);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> returnOrder(String orderId, {required String reason}) async {
+    try {
+      _setLoading(true);
+      _error = null;
+
+      await _apiService.updateOrderStatus(
+        orderId,
+        OrderStatus.returned.toString().split('.').last,
+        comment: reason,
+      );
+      await refreshOrders(reset: true);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  void _setLoading(bool value) {
+    if (!_disposed) {
+      _isLoading = value;
       notifyListeners();
     }
   }
 
-  // Clear current order
-  void clearCurrentOrder() {
-    _currentOrder = null;
-    notifyListeners();
-  }
+  bool _disposed = false;
 
-  // Filter orders by status
-  List<Order> getOrdersByStatus(OrderStatus status) {
-    return _orders.where((order) => order.status == status).toList();
-  }
-
-  // Get orders within date range
-  List<Order> getOrdersByDateRange(DateTime start, DateTime end) {
-    return _orders.where((order) {
-      return order.createdAt.isAfter(start) && order.createdAt.isBefore(end);
-    }).toList();
-  }
-
-  // Search orders
-  List<Order> searchOrders(String query) {
-    final lowercaseQuery = query.toLowerCase();
-    return _orders.where((order) {
-      return order.id.toLowerCase().contains(lowercaseQuery) ||
-          order.shippingAddress.name.toLowerCase().contains(lowercaseQuery) ||
-          order.items.any((item) =>
-              item.product.name.toLowerCase().contains(lowercaseQuery));
-    }).toList();
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }

@@ -144,7 +144,7 @@ class AuthProvider with ChangeNotifier {
     _tokenRefreshTimer?.cancel();
     _tokenRefreshTimer = Timer.periodic(
       const Duration(minutes: 55),
-          (timer) async {
+      (timer) async {
         try {
           await _refreshToken();
           _logger.i('Successfully refreshed tokens via timer');

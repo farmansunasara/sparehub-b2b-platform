@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../models/address.dart';
+import '../../../../providers/auth_provider.dart';
 import '../../../../providers/checkout_provider.dart';
 import '../../../../providers/address_provider.dart';
 import '../checkout_screen.dart';
+import '../../../../services/api_service.dart';
 
 class AddressStep extends StatelessWidget {
   const AddressStep({super.key});
@@ -17,20 +20,39 @@ class AddressStep extends StatelessWidget {
         }
 
         if (addressProvider.error != null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  addressProvider.error!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                const SizedBox(height: 16),
-                FilledButton.tonal(
-                  onPressed: () => addressProvider.refreshAddresses(),
-                  child: const Text('Retry'),
-                ),
-              ],
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    addressProvider.error!,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.red[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => addressProvider.refreshAddresses(),
+                    style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                      backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                    ),
+                    child: Text(
+                      'Retry',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -46,16 +68,16 @@ class AddressStep extends StatelessWidget {
             Expanded(
               child: CustomScrollView(
                 slivers: [
-                  // Saved Addresses
                   if (addressProvider.addresses.isNotEmpty) ...[
-                    const SliverPadding(
-                      padding: EdgeInsets.all(16),
+                    SliverPadding(
+                      padding: const EdgeInsets.all(16),
                       sliver: SliverToBoxAdapter(
                         child: Text(
                           'Select Delivery Address',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
                       ),
@@ -86,14 +108,23 @@ class AddressStep extends StatelessWidget {
                     ),
                   ],
 
-                  // Add New Address Button
                   SliverPadding(
                     padding: const EdgeInsets.all(16),
                     sliver: SliverToBoxAdapter(
-                      child: FilledButton.tonalIcon(
+                      child: ElevatedButton.icon(
                         onPressed: () => _showAddAddressBottomSheet(context),
+                        style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                          backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
+                          foregroundColor: MaterialStateProperty.all(Colors.white),
+                        ),
                         icon: const Icon(Icons.add),
-                        label: const Text('Add New Address'),
+                        label: Text(
+                          'Add New Address',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -101,14 +132,13 @@ class AddressStep extends StatelessWidget {
               ),
             ),
 
-            // Bottom Bar
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 10,
                   ),
                 ],
@@ -151,13 +181,15 @@ class _AddressCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onSelect,
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             border: Border.all(
-              color: isSelected ? theme.primaryColor : Colors.grey[300]!,
+              color: isSelected ? const Color(0xFFFF9800) : Colors.grey[300]!,
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -169,6 +201,7 @@ class _AddressCard extends StatelessWidget {
                 value: true,
                 groupValue: isSelected,
                 onChanged: (_) => onSelect(),
+                activeColor: const Color(0xFFFF9800),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -179,8 +212,10 @@ class _AddressCard extends StatelessWidget {
                       children: [
                         Text(
                           address.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -191,14 +226,15 @@ class _AddressCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: theme.primaryColor.withOpacity(0.1),
+                              color: const Color(0xFFFF9800).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               'Default',
-                              style: TextStyle(
-                                color: theme.primaryColor,
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFFFF9800),
                                 fontSize: 12,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -207,7 +243,8 @@ class _AddressCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       address.phone,
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
                         color: Colors.grey[600],
                       ),
                     ),
@@ -221,6 +258,10 @@ class _AddressCard extends StatelessWidget {
                         address.state,
                         address.pincode,
                       ].join(', '),
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.black87,
+                      ),
                     ),
                   ],
                 ),
@@ -266,8 +307,22 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.status != AuthStatus.authenticated || authProvider.currentUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Please log in to add an address',
+              style: GoogleFonts.poppins(),
+            ),
+            backgroundColor: Colors.red[700],
+          ),
+        );
+        return;
+      }
+
       final address = Address(
-        userId: 'user_id', // TODO: Get from auth provider
+        userId: authProvider.currentUser!.id.toString(),
         name: _nameController.text,
         phone: _phoneController.text,
         addressLine1: _addressLine1Controller.text,
@@ -277,22 +332,50 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
         city: _cityController.text,
         state: _stateController.text,
         pincode: _pincodeController.text,
-        country: 'India', // TODO: Make configurable
+        country: 'India',
         type: _addressType,
         isDefault: _isDefault,
       );
 
-      final result =
-          await context.read<CheckoutProvider>().addNewAddress(address);
-
-      if (context.mounted) {
-        if (result) {
-          Navigator.pop(context);
-        } else {
+      try {
+        final result = await context.read<CheckoutProvider>().addNewAddress(address);
+        if (context.mounted) {
+          if (result) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Address added successfully',
+                  style: GoogleFonts.poppins(),
+                ),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Failed to add address',
+                  style: GoogleFonts.poppins(),
+                ),
+                backgroundColor: Colors.red[700],
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        String errorMessage = 'Failed to add address';
+        if (e is ApiException) {
+          errorMessage = e.message;
+        }
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to add address'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: Text(
+                errorMessage,
+                style: GoogleFonts.poppins(),
+              ),
+              backgroundColor: Colors.red[700],
             ),
           );
         }
@@ -302,6 +385,7 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
@@ -311,208 +395,262 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(
               top: Radius.circular(16),
             ),
           ),
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Add New Address',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-
-              // Form
-              Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: ListView(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(16),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Full Name',
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
-                        validator: (value) {
-                          if (value?.isEmpty ?? true) {
-                            return 'Please enter your name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _phoneController,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone Number',
-                          prefixIcon: Icon(Icons.phone_outlined),
-                        ),
-                        keyboardType: TextInputType.phone,
-                        validator: (value) {
-                          if (value?.isEmpty ?? true) {
-                            return 'Please enter your phone number';
-                          }
-                          if (value!.length != 10) {
-                            return 'Please enter a valid 10-digit phone number';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _addressLine1Controller,
-                        decoration: const InputDecoration(
-                          labelText: 'Address Line 1',
-                          prefixIcon: Icon(Icons.location_on_outlined),
-                        ),
-                        validator: (value) {
-                          if (value?.isEmpty ?? true) {
-                            return 'Please enter your address';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _addressLine2Controller,
-                        decoration: const InputDecoration(
-                          labelText: 'Address Line 2 (Optional)',
-                          prefixIcon: Icon(Icons.location_on_outlined),
+                      Text(
+                        'Add New Address',
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _cityController,
-                              decoration: const InputDecoration(
-                                labelText: 'City',
-                                prefixIcon: Icon(Icons.location_city_outlined),
-                              ),
-                              validator: (value) {
-                                if (value?.isEmpty ?? true) {
-                                  return 'Please enter your city';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _stateController,
-                              decoration: const InputDecoration(
-                                labelText: 'State',
-                                prefixIcon: Icon(Icons.map_outlined),
-                              ),
-                              validator: (value) {
-                                if (value?.isEmpty ?? true) {
-                                  return 'Please enter your state';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _pincodeController,
-                        decoration: const InputDecoration(
-                          labelText: 'PIN Code',
-                          prefixIcon: Icon(Icons.pin_drop_outlined),
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value?.isEmpty ?? true) {
-                            return 'Please enter your PIN code';
-                          }
-                          if (value!.length != 6) {
-                            return 'Please enter a valid 6-digit PIN code';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Address Type',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SegmentedButton<AddressType>(
-                        segments: const [
-                          ButtonSegment(
-                            value: AddressType.home,
-                            label: Text('Home'),
-                            icon: Icon(Icons.home_outlined),
-                          ),
-                          ButtonSegment(
-                            value: AddressType.work,
-                            label: Text('Work'),
-                            icon: Icon(Icons.work_outline),
-                          ),
-                          ButtonSegment(
-                            value: AddressType.other,
-                            label: Text('Other'),
-                            icon: Icon(Icons.place_outlined),
-                          ),
-                        ],
-                        selected: {_addressType},
-                        onSelectionChanged: (Set<AddressType> selected) {
-                          setState(() {
-                            _addressType = selected.first;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      SwitchListTile(
-                        title: const Text('Set as default address'),
-                        value: _isDefault,
-                        onChanged: (value) {
-                          setState(() {
-                            _isDefault = value;
-                          });
-                        },
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
-              ),
+                const Divider(height: 1),
 
-              // Submit Button
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: CheckoutButton(
-                  label: 'Save Address',
-                  onPressed: _submitForm,
+                Expanded(
+                  child: Form(
+                    key: _formKey,
+                    child: ListView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Full Name',
+                            prefixIcon: const Icon(Icons.person_outline),
+                            labelStyle: GoogleFonts.poppins(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          style: GoogleFonts.poppins(),
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) {
+                              return 'Please enter your name';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _phoneController,
+                          decoration: InputDecoration(
+                            labelText: 'Phone Number',
+                            prefixIcon: const Icon(Icons.phone_outlined),
+                            labelStyle: GoogleFonts.poppins(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          style: GoogleFonts.poppins(),
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) {
+                              return 'Please enter your phone number';
+                            }
+                            if (value!.length != 10) {
+                              return 'Please enter a valid 10-digit phone number';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _addressLine1Controller,
+                          decoration: InputDecoration(
+                            labelText: 'Address Line 1',
+                            prefixIcon: const Icon(Icons.location_on_outlined),
+                            labelStyle: GoogleFonts.poppins(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          style: GoogleFonts.poppins(),
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) {
+                              return 'Please enter your address';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _addressLine2Controller,
+                          decoration: InputDecoration(
+                            labelText: 'Address Line 2 (Optional)',
+                            prefixIcon: const Icon(Icons.location_on_outlined),
+                            labelStyle: GoogleFonts.poppins(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          style: GoogleFonts.poppins(),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _cityController,
+                                decoration: InputDecoration(
+                                  labelText: 'City',
+                                  prefixIcon: const Icon(Icons.location_city_outlined),
+                                  labelStyle: GoogleFonts.poppins(),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                style: GoogleFonts.poppins(),
+                                validator: (value) {
+                                  if (value?.isEmpty ?? true) {
+                                    return 'Please enter your city';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _stateController,
+                                decoration: InputDecoration(
+                                  labelText: 'State',
+                                  prefixIcon: const Icon(Icons.map_outlined),
+                                  labelStyle: GoogleFonts.poppins(),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                style: GoogleFonts.poppins(),
+                                validator: (value) {
+                                  if (value?.isEmpty ?? true) {
+                                    return 'Please enter your state';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _pincodeController,
+                          decoration: InputDecoration(
+                            labelText: 'PIN Code',
+                            prefixIcon: const Icon(Icons.pin_drop_outlined),
+                            labelStyle: GoogleFonts.poppins(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          style: GoogleFonts.poppins(),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) {
+                              return 'Please enter your PIN code';
+                            }
+                            if (value!.length != 6) {
+                              return 'Please enter a valid 6-digit PIN code';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Address Type',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SegmentedButton<AddressType>(
+                          segments: [
+                            ButtonSegment(
+                              value: AddressType.home,
+                              label: Text(
+                                'Home',
+                                style: GoogleFonts.poppins(),
+                              ),
+                              icon: const Icon(Icons.home_outlined),
+                            ),
+                            ButtonSegment(
+                              value: AddressType.work,
+                              label: Text(
+                                'Work',
+                                style: GoogleFonts.poppins(),
+                              ),
+                              icon: const Icon(Icons.work_outline),
+                            ),
+                            ButtonSegment(
+                              value: AddressType.other,
+                              label: Text(
+                                'Other',
+                                style: GoogleFonts.poppins(),
+                              ),
+                              icon: const Icon(Icons.place_outlined),
+                            ),
+                          ],
+                          selected: {_addressType},
+                          onSelectionChanged: (Set<AddressType> selected) {
+                            setState(() {
+                              _addressType = selected.first;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        SwitchListTile(
+                          title: Text(
+                            'Set as default address',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          value: _isDefault,
+                          onChanged: (value) {
+                            setState(() {
+                              _isDefault = value;
+                            });
+                          },
+                          activeColor: const Color(0xFFFF9800),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
+
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: CheckoutButton(
+                    label: 'Save Address',
+                    onPressed: _submitForm,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

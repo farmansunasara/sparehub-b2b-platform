@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../models/cart.dart';
 
 class CartSummary extends StatelessWidget {
@@ -13,13 +14,14 @@ class CartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: theme.scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.1), // Stronger shadow
             blurRadius: 10,
           ),
         ],
@@ -31,19 +33,20 @@ class CartSummary extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Total',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
                 ),
                 Text(
                   '₹${cart.total.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    fontSize: 24,
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
+                    color: const Color(0xFFFF9800),
                   ),
                 ),
               ],
@@ -52,9 +55,19 @@ class CartSummary extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: 48,
-              child: FilledButton(
+              child: ElevatedButton(
                 onPressed: onCheckout,
-                child: const Text('Proceed to Checkout'),
+                style: theme.elevatedButtonTheme.style?.copyWith(
+                  backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
+                  foregroundColor: MaterialStateProperty.all(Colors.white),
+                ),
+                child: Text(
+                  'Proceed to Checkout',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],

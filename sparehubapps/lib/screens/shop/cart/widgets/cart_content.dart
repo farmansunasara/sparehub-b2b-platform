@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../models/cart.dart';
 import 'cart_item_card.dart';
 import 'cart_summary.dart';
@@ -39,9 +40,14 @@ class CartContent extends StatelessWidget {
                   onRemoveItem(item.product.id!);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${item.product.name} removed from cart'),
+                      content: Text(
+                        '${item.product.name} removed from cart',
+                        style: GoogleFonts.poppins(),
+                      ),
+                      backgroundColor: Colors.green,
                       action: SnackBarAction(
                         label: 'Undo',
+                        textColor: Colors.white,
                         onPressed: () => onUndoRemove(item.product.id!),
                       ),
                     ),

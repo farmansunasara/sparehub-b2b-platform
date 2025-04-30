@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -10,45 +13,73 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  final Logger _logger = Logger();
 
   final List<OnboardingItem> _items = [
     OnboardingItem(
       title: 'Welcome to SpareHub',
-      description: 'Your one-stop B2B marketplace for automotive spare parts',
+      description: 'Your trusted B2B marketplace for automotive spare parts.',
       icon: Icons.car_repair,
     ),
     OnboardingItem(
       title: 'For Manufacturers',
-      description: 'List your products and reach thousands of auto parts retailers',
+      description: 'Showcase your products and connect with retailers nationwide.',
       icon: Icons.factory_outlined,
     ),
     OnboardingItem(
       title: 'For Shop Owners',
-      description: 'Source quality spare parts directly from manufacturers',
+      description: 'Source high-quality spare parts directly from manufacturers.',
       icon: Icons.store_outlined,
     ),
   ];
 
+  Future<void> _completeOnboarding() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('has_seen_onboarding', true);
+      _logger.i('Onboarding completed at page: $_currentPage');
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/auth/role-selection');
+    } catch (e) {
+      _logger.e('Error completing onboarding: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error navigating: $e',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.red,
+          action: SnackBarAction(
+            label: 'Retry',
+            textColor: Colors.white,
+            onPressed: _completeOnboarding,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
             // Background gradient
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Theme.of(context).primaryColor.withOpacity(0.1),
-                    Colors.white,
+                    Color(0xFF1976D2), // Primary blue
+                    Color(0xFFFF9800), // Orange accent
                   ],
                 ),
               ),
             ),
-            
             // Content
             Column(
               children: [
@@ -66,7 +97,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                   ),
                 ),
-                
                 // Page indicator
                 Padding(
                   padding: const EdgeInsets.only(bottom: 32.0),
@@ -78,7 +108,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                 ),
-                
                 // Bottom buttons
                 Container(
                   padding: const EdgeInsets.fromLTRB(24.0, 0, 24.0, 32.0),
@@ -87,14 +116,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/auth/role-selection');
+                          _logger.i('Onboarding skipped at page: $_currentPage');
+                          _completeOnboarding();
                         },
-                        child: const Text('Skip'),
+                        child: Text(
+                          'Skip',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           if (_currentPage == _items.length - 1) {
-                            Navigator.pushReplacementNamed(context, '/auth/role-selection');
+                            _completeOnboarding();
                           } else {
                             _pageController.nextPage(
                               duration: const Duration(milliseconds: 300),
@@ -103,14 +140,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF9800),
+                          foregroundColor: Colors.white,
                           minimumSize: const Size(120, 48),
                           padding: const EdgeInsets.symmetric(horizontal: 32.0),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                          elevation: 4,
                         ),
                         child: Text(
                           _currentPage == _items.length - 1 ? 'Get Started' : 'Next',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -131,33 +175,53 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Icon(
               item.icon,
               size: 120,
-              color: Theme.of(context).primaryColor,
+              color: Colors.white,
+              semanticLabel: item.title,
             ),
           ),
           const SizedBox(height: 48),
           Text(
             item.title,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  blurRadius: 4,
+                  color: Colors.black.withOpacity(0.3),
+                  offset: const Offset(2, 2),
+                ),
+              ],
             ),
             textAlign: TextAlign.center,
+            semanticsLabel: item.title,
           ),
           const SizedBox(height: 16),
           Text(
             item.description,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.grey[600],
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Colors.white70,
             ),
             textAlign: TextAlign.center,
+            semanticsLabel: item.description,
           ),
         ],
       ),
@@ -171,9 +235,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       width: _currentPage == index ? 24 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: _currentPage == index 
-          ? Theme.of(context).primaryColor 
-          : Colors.grey[300],
+        color: _currentPage == index ? const Color(0xFFFF9800) : Colors.white.withOpacity(0.5),
         borderRadius: BorderRadius.circular(4),
       ),
     );

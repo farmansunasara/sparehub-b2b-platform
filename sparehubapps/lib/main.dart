@@ -87,31 +87,17 @@ void main() async {
             prefs,
           ),
         ),
-        ChangeNotifierProxyProvider<AuthProvider, OrderProvider>(
+        ChangeNotifierProvider(
           create: (context) => OrderProvider(
             Provider.of<ApiService>(context, listen: false),
-            prefs,
-            Provider.of<AuthProvider>(context, listen: false),
-          ),
-          update: (context, auth, previous) => OrderProvider(
-            Provider.of<ApiService>(context, listen: false),
-            prefs,
-            auth,
           ),
         ),
-        ChangeNotifierProxyProvider4<AuthProvider, CartProvider, AddressProvider,
-            OrderProvider, CheckoutProvider>(
+        ChangeNotifierProvider(
           create: (context) => CheckoutProvider(
             Provider.of<CartProvider>(context, listen: false),
             Provider.of<AddressProvider>(context, listen: false),
             Provider.of<OrderProvider>(context, listen: false),
           ),
-          update: (context, auth, cart, address, order, previous) =>
-              CheckoutProvider(
-                cart,
-                address,
-                order,
-              ),
         ),
       ],
       child: const MyApp(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/checkout_provider.dart';
 import '../../../../models/order.dart';
@@ -20,11 +21,12 @@ class ConfirmationStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Order Summary
-          const Text(
+          Text(
             'Order Summary',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 16),
@@ -33,16 +35,33 @@ class ConfirmationStep extends StatelessWidget {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: cartProvider.items.length,
+            itemCount: orderSummary['items'].length,
             itemBuilder: (context, index) {
-              final item = cartProvider.items[index];
+              final item = orderSummary['items'][index];
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(item.product.name),
-                subtitle: Text('Quantity: ${item.quantity}'),
+                title: Text(
+                  item['productName'],
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                subtitle: Text(
+                  'Quantity: ${item['quantity']}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
                 trailing: Text(
-                  '₹${(item.product.price * item.quantity).toStringAsFixed(2)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  '₹${(item['price'] * item['quantity']).toStringAsFixed(2)}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFFF9800),
+                  ),
                 ),
               );
             },
@@ -50,38 +69,64 @@ class ConfirmationStep extends StatelessWidget {
           const Divider(),
 
           // Price Details
-          _buildPriceRow('Subtotal', orderSummary['subtotal']!),
-          _buildPriceRow('Shipping', orderSummary['shipping']!),
-          _buildPriceRow('Tax', orderSummary['tax']!),
+          _buildPriceRow('Subtotal', orderSummary['subtotal']),
+          _buildPriceRow('Shipping', orderSummary['shipping']),
+          _buildPriceRow('Tax', orderSummary['tax']),
           const Divider(),
           _buildPriceRow(
             'Total',
-            orderSummary['total']!,
+            orderSummary['total'],
             isTotal: true,
           ),
           const SizedBox(height: 24),
 
           // Shipping Address
-          const Text(
+          Text(
             'Shipping Address',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
           Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(checkoutProvider.selectedShippingAddress?.name ?? ''),
-                  Text(checkoutProvider.selectedShippingAddress?.addressLine1 ?? ''),
+                  Text(
+                    checkoutProvider.selectedShippingAddress?.name ?? 'Not provided',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    checkoutProvider.selectedShippingAddress?.addressLine1 ?? '',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                  ),
                   Text(
                     '${checkoutProvider.selectedShippingAddress?.city ?? ''}, ${checkoutProvider.selectedShippingAddress?.state ?? ''} ${checkoutProvider.selectedShippingAddress?.pincode ?? ''}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
                   ),
-                  Text(checkoutProvider.selectedShippingAddress?.phone ?? ''),
+                  Text(
+                    checkoutProvider.selectedShippingAddress?.phone ?? '',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -89,69 +134,76 @@ class ConfirmationStep extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Payment Method
-          const Text(
+          Text(
             'Payment Method',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
           Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: ListTile(
               leading: Icon(
                 _getPaymentIcon(checkoutProvider.selectedPaymentMethod),
                 size: 32,
+                color: const Color(0xFFFF9800),
               ),
               title: Text(
                 _getPaymentMethodName(checkoutProvider.selectedPaymentMethod),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 32),
 
-          // Place Order Button
+          // Error Message
           if (checkoutProvider.error != null)
-            Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.red[50],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.error_outline, color: Colors.red[900]),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      checkoutProvider.error!,
-                      style: TextStyle(color: Colors.red[900]),
-                    ),
-                  ),
-                ],
-              ),
+            CheckoutErrorBanner(
+              message: checkoutProvider.error!,
+              onDismiss: () => checkoutProvider.resetCheckout(),
             ),
 
+          // Place Order Button
           SizedBox(
             width: double.infinity,
             height: 48,
-            child: FilledButton(
+            child: ElevatedButton(
               onPressed: checkoutProvider.isLoading
                   ? null
                   : () => checkoutProvider.placeOrder(),
+              style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
+                foregroundColor: MaterialStateProperty.all(Colors.white),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
               child: checkoutProvider.isLoading
                   ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-                  : const Text('Place Order'),
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(
+                      'Place Order',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -165,16 +217,18 @@ class ConfirmationStep extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            style: GoogleFonts.poppins(
               fontSize: isTotal ? 18 : 16,
+              fontWeight: isTotal ? FontWeight.w600 : FontWeight.w500,
+              color: Colors.black87,
             ),
           ),
           Text(
             '₹${amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            style: GoogleFonts.poppins(
               fontSize: isTotal ? 18 : 16,
+              fontWeight: isTotal ? FontWeight.w600 : FontWeight.w500,
+              color: isTotal ? const Color(0xFFFF9800) : Colors.black87,
             ),
           ),
         ],

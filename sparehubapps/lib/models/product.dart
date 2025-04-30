@@ -164,14 +164,14 @@ class Product {
       description: json['description'] ?? '',
       sku: json['sku'] ?? '',
       brandId: json['brand'] is Map ? json['brand']['id'] : json['brand_id'],
-      categoryId: json['category'] is Map 
-          ? json['category']['id'] 
+      categoryId: json['category'] is Map
+          ? json['category']['id']
           : json['category_id'] ?? 0,
-      subcategoryId: json['subcategory'] is Map 
-          ? json['subcategory']['id'] 
+      subcategoryId: json['subcategory'] is Map
+          ? json['subcategory']['id']
           : json['subcategory_id'] ?? 0,
-      manufacturerId: json['manufacturer'] is Map 
-          ? json['manufacturer']['id'] 
+      manufacturerId: json['manufacturer'] is Map
+          ? json['manufacturer']['id']
           : (json['manufacturer'] ?? 0),
       price: json['price'] != null
           ? (json['price'] is num

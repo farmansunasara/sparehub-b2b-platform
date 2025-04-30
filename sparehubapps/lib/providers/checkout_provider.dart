@@ -31,10 +31,10 @@ class CheckoutProvider with ChangeNotifier {
   double _total = 0;
 
   CheckoutProvider(
-    this._cartProvider,
-    this._addressProvider,
-    this._orderProvider,
-  ) {
+      this._cartProvider,
+      this._addressProvider,
+      this._orderProvider,
+      ) {
     // Initialize order summary
     _calculateOrderSummary();
   }
@@ -63,9 +63,9 @@ class CheckoutProvider with ChangeNotifier {
 
   bool get canPlaceOrder =>
       currentStep == CheckoutStep.confirmation &&
-      selectedShippingAddress != null &&
-      selectedPaymentMethod != null &&
-      !_isLoading;
+          selectedShippingAddress != null &&
+          selectedPaymentMethod != null &&
+          !_isLoading;
 
   // Calculate order summary
   void _calculateOrderSummary() {
@@ -73,7 +73,7 @@ class CheckoutProvider with ChangeNotifier {
     _tax = _subtotal * 0.18; // 18% GST
     _shippingCost = _cartProvider.cart.items.fold<double>(
       0,
-      (sum, item) => sum + (item.product.shippingCost * item.quantity),
+          (sum, item) => sum + (item.product.shippingCost * item.quantity),
     );
     _total = _subtotal + _tax + _shippingCost;
     notifyListeners();
@@ -160,8 +160,8 @@ class CheckoutProvider with ChangeNotifier {
 
       final order = await _orderProvider.createOrder(
         cart: _cartProvider.cart,
-        shippingAddress: selectedShippingAddress!,
-        billingAddress: _useShippingAsBilling ? null : selectedShippingAddress,
+        shippingAddress: selectedShippingAddress!.toOrderAddress(),
+        billingAddress: _useShippingAsBilling ? null : selectedShippingAddress!.toOrderAddress(),
         paymentMethod: _selectedPaymentMethod,
         metadata: {
           'checkout_timestamp': DateTime.now().toIso8601String(),
@@ -213,8 +213,7 @@ class CheckoutProvider with ChangeNotifier {
         .toList();
 
     if (outOfStockItems.isNotEmpty) {
-      _error =
-          'Some items are out of stock: ${outOfStockItems.join(', ')}';
+      _error = 'Some items are out of stock: ${outOfStockItems.join(', ')}';
       notifyListeners();
       return false;
     }

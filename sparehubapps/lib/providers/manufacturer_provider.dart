@@ -13,8 +13,8 @@ import '../models/brand.dart';
 import '../models/category.dart';
 import '../models/subcategory.dart';
 import 'auth_provider.dart';
+import 'package:logger/logger.dart';
 
-// Custom exception for validation errors
 class ValidationError implements Exception {
   final String message;
   const ValidationError(this.message);
@@ -25,13 +25,15 @@ class ValidationError implements Exception {
 class ManufacturerProvider with ChangeNotifier {
   final ApiService _apiService;
   final BuildContext context;
+  final Logger _logger = Logger();
 
-  // State
   List<Brand> _brands = [];
   List<Category> _categories = [];
   List<Subcategory> _subcategories = [];
   List<Product> _products = [];
   List<Order> _orders = [];
+  Map<String, dynamic>? _manufacturerProfile;
+  List<dynamic>? _analytics;
   bool _isLoading = false;
   String? _error;
 
@@ -42,34 +44,31 @@ class ManufacturerProvider with ChangeNotifier {
     _initializeData();
   }
 
-  // Getters
   List<Brand> get brands => _brands;
   List<Category> get categories => _categories;
   List<Subcategory> get subcategories => _subcategories;
   List<Product> get products => _products;
   List<Order> get orders => _orders;
+  Map<String, dynamic>? get manufacturerProfile => _manufacturerProfile;
+  List<dynamic>? get analytics => _analytics;
   bool get isLoading => _isLoading;
   String? get error => _error;
   String get manufacturerId => Provider.of<AuthProvider>(context, listen: false).currentUser?.id.toString() ?? '';
 
-  // Products by status
   List<Product> get activeProducts => _products.where((p) => p.isActive).toList();
   List<Product> get inactiveProducts => _products.where((p) => !p.isActive).toList();
 
-  // Helper methods
   List<Subcategory> getSubcategories(int categoryId) {
     return _subcategories.where((s) => s.categoryId == categoryId).toList();
   }
 
-  // Orders by status
   List<Order> get pendingOrders => _orders.where((o) => o.status == OrderStatus.pending).toList();
   List<Order> get processingOrders => _orders.where((o) => o.status == OrderStatus.processing).toList();
   List<Order> get shippedOrders => _orders.where((o) => o.status == OrderStatus.shipped).toList();
   List<Order> get deliveredOrders => _orders.where((o) => o.status == OrderStatus.delivered).toList();
 
-  // Analytics
   double get totalRevenue => _orders
-      .where((o) => o.status != OrderStatus.cancelled)
+      .where((o) => o.status != OrderStatus.cancelled && o.status != OrderStatus.returned)
       .fold(0.0, (sum, order) => sum + order.total);
 
   int get totalOrders => _orders.length;
@@ -78,7 +77,51 @@ class ManufacturerProvider with ChangeNotifier {
       .where((p) => p.stockQuantity < 10 && p.isActive)
       .length;
 
-  // Product methods
+  void _safeNotifyListeners() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
+  }
+
+  Future<List<http.MultipartFile>> _prepareFiles(List<File> images, File? technicalPdf, File? installationPdf) async {
+    final List<http.MultipartFile> files = [];
+
+    for (var image in images) {
+      final bytes = await image.readAsBytes();
+      final ext = image.path.split('.').last.toLowerCase();
+      final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
+
+      files.add(http.MultipartFile.fromBytes(
+        'images',
+        bytes,
+        filename: image.path.split('/').last,
+        contentType: MediaType.parse(contentType),
+      ));
+    }
+
+    if (technicalPdf != null) {
+      final bytes = await technicalPdf.readAsBytes();
+      files.add(http.MultipartFile.fromBytes(
+        'technical_specification_pdf',
+        bytes,
+        filename: technicalPdf.path.split('/').last,
+        contentType: MediaType.parse('application/pdf'),
+      ));
+    }
+
+    if (installationPdf != null) {
+      final bytes = await installationPdf.readAsBytes();
+      files.add(http.MultipartFile.fromBytes(
+        'installation_guide_pdf',
+        bytes,
+        filename: installationPdf.path.split('/').last,
+        contentType: MediaType.parse('application/pdf'),
+      ));
+    }
+
+    return files;
+  }
+
   Future<void> addProduct({
     required Product product,
     required List<File> images,
@@ -88,16 +131,14 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
-      // Validate required fields
       if (product.name.isEmpty) throw ValidationError('Product name is required');
       if (product.sku.isEmpty) throw ValidationError('SKU is required');
-      if (product.categoryId == null) throw ValidationError('Category is required');
-      if (product.subcategoryId == null) throw ValidationError('Subcategory is required');
+      if (product.categoryId == 0) throw ValidationError('Category is required');
+      if (product.subcategoryId == 0) throw ValidationError('Subcategory is required');
       if (images.isEmpty) throw ValidationError('At least one product image is required');
 
-      // Validate file types
       for (var image in images) {
         final ext = image.path.split('.').last.toLowerCase();
         if (!['jpg', 'jpeg', 'png', 'webp'].contains(ext)) {
@@ -113,114 +154,83 @@ class ManufacturerProvider with ChangeNotifier {
         throw ValidationError('Installation guide must be a PDF file');
       }
 
-      // Prepare product data
       final productData = product.toJson();
       productData['manufacturer'] = manufacturerId;
+      productData['category_id'] = product.categoryId.toString();
+      productData['subcategory_id'] = product.subcategoryId.toString();
 
-      // Create multipart request
       final request = http.MultipartRequest(
         'POST',
         Uri.parse('${ApiService.baseUrl}/products/'),
       );
 
-      // Add product fields
       productData.forEach((key, value) {
-        if (key == 'compatible_car_ids') {
-          // Always include compatible_car_ids as an empty list if not provided
-          request.fields[key] = json.encode(value ?? []);
-        } else if (value != null) {
-          if (value is List) {
-            request.fields[key] = json.encode(value);
+        if (value != null) {
+          if (key == 'images') return;
+          if (key == 'compatible_car_ids') {
+            request.fields[key] = json.encode(value ?? []);
           } else {
             request.fields[key] = value.toString();
           }
         }
       });
 
-      // Add images with proper content type
-      for (var image in images) {
-        final stream = http.ByteStream(image.openRead());
-        final length = await image.length();
-        final ext = image.path.split('.').last.toLowerCase();
-        final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
-        
-        final multipartFile = http.MultipartFile(
-          'images',
-          stream,
-          length,
-          filename: image.path.split('/').last,
-          contentType: MediaType.parse(contentType),
-        );
-        request.files.add(multipartFile);
-      }
+      _logger.i('Sending multipart request with fields: ${request.fields}');
 
-      // Add PDFs with proper content type
-      if (technicalSpecificationPdf != null) {
-        final stream = http.ByteStream(technicalSpecificationPdf.openRead());
-        final length = await technicalSpecificationPdf.length();
-        final multipartFile = http.MultipartFile(
-          'technical_specification_pdf',
-          stream,
-          length,
-          filename: technicalSpecificationPdf.path.split('/').last,
-          contentType: MediaType.parse('application/pdf'),
-        );
-        request.files.add(multipartFile);
-      }
+      final files = await _prepareFiles(images, technicalSpecificationPdf, installationGuidePdf);
+      request.files.addAll(files);
 
-      if (installationGuidePdf != null) {
-        final stream = http.ByteStream(installationGuidePdf.openRead());
-        final length = await installationGuidePdf.length();
-        final multipartFile = http.MultipartFile(
-          'installation_guide_pdf',
-          stream,
-          length,
-          filename: installationGuidePdf.path.split('/').last,
-          contentType: MediaType.parse('application/pdf'),
-        );
-        request.files.add(multipartFile);
-      }
-
-      // Send request and handle response
       final response = await _apiService.sendMultipartRequest(request);
-      
-      if (response == null) {
-        throw ApiException(message: 'No response from server', statusCode: 500);
-      }
 
       try {
         final newProduct = Product.fromJson(response);
         _products.add(newProduct);
-        notifyListeners();
+        _safeNotifyListeners();
       } catch (e) {
         throw ApiException(
           message: 'Failed to parse product data: ${e.toString()}',
-          statusCode: 500
+          statusCode: 500,
         );
       }
-
     } catch (e) {
+      String errorMessage;
       if (e is ValidationError) {
-        _error = e.message;
+        errorMessage = e.message;
       } else if (e is ApiException) {
-        _error = e.message;
+        errorMessage = e.message;
         if (e.statusCode == 401) {
-          _error = 'Authentication failed. Please log in again.';
-          // Notify auth provider about token expiration
+          errorMessage = 'Authentication failed. Please log in again.';
           Provider.of<AuthProvider>(context, listen: false).logout();
+        } else if (e.statusCode == 400) {
+          try {
+            final errorData = jsonDecode(e.message.split('Response Body: ')[1]);
+            if (errorData is Map<String, dynamic>) {
+              final errors = <String>[];
+              errorData.forEach((key, value) {
+                if (key == 'non_field_errors') {
+                  errors.add(value is List ? value.join('; ') : value.toString());
+                } else {
+                  errors.add('$key: ${value is List ? value.join('; ') : value}');
+                }
+              });
+              errorMessage = errors.join('; ');
+            }
+          } catch (_) {
+            errorMessage = 'Invalid product data. Please check all fields.';
+          }
         }
       } else {
-        _error = 'An unexpected error occurred. Please try again.';
+        errorMessage = 'An unexpected error occurred. Please try again.';
       }
-      print('Error adding product: $_error\nDetails: $e');
-      notifyListeners();
-      rethrow;
+      _error = errorMessage;
+      _logger.e('Error adding product: $_error\nDetails: $e');
+      _safeNotifyListeners();
+      throw Exception(errorMessage);
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
-
 
   Future<void> updateProduct({
     required Product product,
@@ -231,16 +241,14 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
-      // Validate required fields
       if (product.id == null) throw ValidationError('Product ID is required');
       if (product.name.isEmpty) throw ValidationError('Product name is required');
       if (product.sku.isEmpty) throw ValidationError('SKU is required');
-      if (product.categoryId == null) throw ValidationError('Category is required');
-      if (product.subcategoryId == null) throw ValidationError('Subcategory is required');
+      if (product.categoryId == 0) throw ValidationError('Category is required');
+      if (product.subcategoryId == 0) throw ValidationError('Subcategory is required');
 
-      // Validate file types if provided
       if (images != null) {
         for (var image in images) {
           final ext = image.path.split('.').last.toLowerCase();
@@ -258,83 +266,36 @@ class ManufacturerProvider with ChangeNotifier {
         throw ValidationError('Installation guide must be a PDF file');
       }
 
-      // Prepare product data
       final productData = product.toJson();
       productData['manufacturer'] = manufacturerId;
+      productData['category_id'] = product.categoryId.toString();
+      productData['subcategory_id'] = product.subcategoryId.toString();
 
-      // Create multipart request for file uploads
       if (images != null || technicalSpecificationPdf != null || installationGuidePdf != null) {
         final request = http.MultipartRequest(
           'PUT',
           Uri.parse('${ApiService.baseUrl}/products/${product.id}/'),
         );
 
-      // Add product fields
-      productData.forEach((key, value) {
-        if (key == 'compatible_car_ids') {
-          // Always include compatible_car_ids as an empty list if not provided
-          request.fields[key] = json.encode(value ?? []);
-        } else if (value != null) {
-          if (value is List) {
-            request.fields[key] = json.encode(value);
-          } else {
+        productData.forEach((key, value) {
+          if (key == 'images') return;
+          if (key == 'compatible_car_ids') {
+            request.fields[key] = json.encode(value ?? []);
+          } else if (value != null) {
             request.fields[key] = value.toString();
           }
-        }
-      });
+        });
 
-        // Add images with proper content type if provided
-        if (images != null) {
-          for (var image in images) {
-            final stream = http.ByteStream(image.openRead());
-            final length = await image.length();
-            final ext = image.path.split('.').last.toLowerCase();
-            final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
-            
-            final multipartFile = http.MultipartFile(
-              'images',
-              stream,
-              length,
-              filename: image.path.split('/').last,
-              contentType: MediaType.parse(contentType),
-            );
-            request.files.add(multipartFile);
-          }
-        }
+        _logger.i('Sending multipart request with fields: ${request.fields}');
 
-        // Add PDFs with proper content type if provided
-        if (technicalSpecificationPdf != null) {
-          final stream = http.ByteStream(technicalSpecificationPdf.openRead());
-          final length = await technicalSpecificationPdf.length();
-          final multipartFile = http.MultipartFile(
-            'technical_specification_pdf',
-            stream,
-            length,
-            filename: technicalSpecificationPdf.path.split('/').last,
-            contentType: MediaType.parse('application/pdf'),
-          );
-          request.files.add(multipartFile);
-        }
+        final files = await _prepareFiles(
+          images ?? [],
+          technicalSpecificationPdf,
+          installationGuidePdf,
+        );
+        request.files.addAll(files);
 
-        if (installationGuidePdf != null) {
-          final stream = http.ByteStream(installationGuidePdf.openRead());
-          final length = await installationGuidePdf.length();
-          final multipartFile = http.MultipartFile(
-            'installation_guide_pdf',
-            stream,
-            length,
-            filename: installationGuidePdf.path.split('/').last,
-            contentType: MediaType.parse('application/pdf'),
-          );
-          request.files.add(multipartFile);
-        }
-
-        // Send multipart request and handle response
         final response = await _apiService.sendMultipartRequest(request);
-        
-        if (response == null) {
-          throw ApiException(message: 'No response from server', statusCode: 500);
-        }
 
         try {
           final updatedProduct = Product.fromJson(response);
@@ -342,43 +303,59 @@ class ManufacturerProvider with ChangeNotifier {
           if (index != -1) {
             _products[index] = updatedProduct;
           }
-          notifyListeners();
+          _safeNotifyListeners();
         } catch (e) {
           throw ApiException(
             message: 'Failed to parse product data: ${e.toString()}',
-            statusCode: 500
+            statusCode: 500,
           );
         }
       } else {
-        // If no files to upload, use regular update
         final response = await _apiService.updateProduct(product.id!, productData);
         final updatedProduct = Product.fromJson(response);
         final index = _products.indexWhere((p) => p.id == product.id);
         if (index != -1) {
           _products[index] = updatedProduct;
         }
-        notifyListeners();
+        _safeNotifyListeners();
       }
-
     } catch (e) {
+      String errorMessage;
       if (e is ValidationError) {
-        _error = e.message;
+        errorMessage = e.message;
       } else if (e is ApiException) {
-        _error = e.message;
+        errorMessage = e.message;
         if (e.statusCode == 401) {
-          _error = 'Authentication failed. Please log in again.';
-          // Notify auth provider about token expiration
+          errorMessage = 'Authentication failed. Please log in again.';
           Provider.of<AuthProvider>(context, listen: false).logout();
+        } else if (e.statusCode == 400) {
+          try {
+            final errorData = jsonDecode(e.message.split('Response Body: ')[1]);
+            if (errorData is Map<String, dynamic>) {
+              final errors = <String>[];
+              errorData.forEach((key, value) {
+                if (key == 'non_field_errors') {
+                  errors.add(value is List ? value.join('; ') : value.toString());
+                } else {
+                  errors.add('$key: ${value is List ? value.join('; ') : value}');
+                }
+              });
+              errorMessage = errors.join('; ');
+            }
+          } catch (_) {
+            errorMessage = 'Invalid product data. Please check all fields.';
+          }
         }
       } else {
-        _error = 'An unexpected error occurred. Please try again.';
+        errorMessage = 'An unexpected error occurred. Please try again.';
       }
-      print('Error updating product: $_error\nDetails: $e');
-      notifyListeners();
-      rethrow;
+      _error = errorMessage;
+      _logger.e('Error updating product: $_error\nDetails: $e');
+      _safeNotifyListeners();
+      throw Exception(errorMessage);
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -386,7 +363,7 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
       if (productId == null) {
         throw Exception('Product ID is required');
@@ -400,15 +377,15 @@ class ManufacturerProvider with ChangeNotifier {
       } else {
         throw Exception('Product not found');
       }
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      print('Error updating product stock: $e');
-      notifyListeners();
+      _logger.e('Error updating product stock: $e');
+      _safeNotifyListeners();
       rethrow;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -416,7 +393,7 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
       final response = await _apiService.updateOrderStatus(
         orderId,
@@ -427,15 +404,15 @@ class ManufacturerProvider with ChangeNotifier {
       if (index != -1) {
         _orders[index] = updatedOrder;
       }
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      print('Error updating order status: $e');
-      notifyListeners();
+      _logger.e('Error updating order status: $e');
+      _safeNotifyListeners();
       rethrow;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -443,42 +420,80 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
       await _apiService.deleteProduct(productId);
       _products.removeWhere((p) => p.id == productId);
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      print('Error deleting product: $e');
-      notifyListeners();
+      _logger.e('Error deleting product: $e');
+      _safeNotifyListeners();
       rethrow;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
+    }
+  }
+
+  Future<void> getManufacturerProfile() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      _safeNotifyListeners();
+
+      final response = await _apiService.getUserProfile();
+      _manufacturerProfile = response;
+      _safeNotifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _logger.e('Error fetching manufacturer profile: $e');
+      _safeNotifyListeners();
+    } finally {
+      _isLoading = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  Future<void> refreshAnalytics() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      _safeNotifyListeners();
+
+      final response = await _apiService.getAnalytics();
+      _analytics = response;
+      _safeNotifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _logger.e('Error fetching analytics: $e');
+      _safeNotifyListeners();
+    } finally {
+      _isLoading = false;
+      _safeNotifyListeners();
     }
   }
 
   void clearError() {
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
-  // Refresh methods
   Future<void> refreshProducts() => _fetchProducts();
   Future<void> refreshOrders() => _fetchOrders();
   Future<void> refreshBrands() => _fetchBrands();
   Future<void> refreshCategories() => _fetchCategories();
   Future<void> refreshSubcategories({int? categoryId}) => _fetchSubcategories(categoryId: categoryId);
 
-  // Private fetch methods
   Future<void> _initializeData() async {
     await Future.wait([
       _fetchBrands(),
       _fetchCategories(),
       _fetchSubcategories(),
       _fetchProducts(),
-      // _fetchOrders(), // Commented out to avoid 404 error
+      _fetchOrders(),
+      getManufacturerProfile(),
+      refreshAnalytics(),
     ]);
   }
 
@@ -486,18 +501,18 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
       final brandsData = await _apiService.getBrands();
       _brands = brandsData.map((json) => Brand.fromJson(json)).toList();
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      print('Error fetching brands: $e');
-      notifyListeners();
+      _logger.e('Error fetching brands: $e');
+      _safeNotifyListeners();
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -505,18 +520,18 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
       final categoriesData = await _apiService.getCategories();
       _categories = categoriesData.map((json) => Category.fromJson(json)).toList();
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      print('Error fetching categories: $e');
-      notifyListeners();
+      _logger.e('Error fetching categories: $e');
+      _safeNotifyListeners();
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -524,38 +539,39 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
       final subcategoriesData = await _apiService.getSubcategories(categoryId: categoryId);
       _subcategories = subcategoriesData.map((json) => Subcategory.fromJson(json)).toList();
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      print('Error fetching subcategories: $e');
-      notifyListeners();
+      _logger.e('Error fetching subcategories: $e');
+      _safeNotifyListeners();
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
-
 
   Future<void> _fetchProducts() async {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
       final productsData = await _apiService.getProducts();
-      _products = productsData.map((json) => Product.fromJson(json)).toList();
-      notifyListeners();
+      _products = (productsData['results'] as List<dynamic>)
+          .map((json) => Product.fromJson(json as Map<String, dynamic>))
+          .toList();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      print('Error fetching products: $e');
-      notifyListeners();
+      _logger.e('Error fetching products: $e');
+      _safeNotifyListeners();
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -563,18 +579,18 @@ class ManufacturerProvider with ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
+      _safeNotifyListeners();
 
       final ordersData = await _apiService.getOrders();
       _orders = ordersData.map((json) => Order.fromJson(json)).toList();
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      print('Error fetching orders: $e');
-      notifyListeners();
+      _logger.e('Error fetching orders: $e');
+      _safeNotifyListeners();
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 }

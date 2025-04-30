@@ -1,8 +1,0 @@
-2025/04/11-01:06:00.058 2568 Creating DB C:\Users\farma\AppData\Local\Temp\flutter_tools.e2287b27\flutter_tools_chrome_device.a0a44ff9\Default\IndexedDB\https_www.google.com_0.indexeddb.leveldb since it was missing.
-2025/04/11-01:06:00.071 2568 Reusing MANIFEST C:\Users\farma\AppData\Local\Temp\flutter_tools.e2287b27\flutter_tools_chrome_device.a0a44ff9\Default\IndexedDB\https_www.google.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/04/11-01:06:01.386 748 Level-0 table #5: started
-2025/04/11-01:06:01.433 748 Level-0 table #5: 792875 bytes OK
-2025/04/11-01:06:01.438 748 Delete type=0 #3
-2025/04/11-01:06:01.597 27f8 Level-0 table #7: started
-2025/04/11-01:06:01.628 27f8 Level-0 table #7: 765150 bytes OK
-2025/04/11-01:06:01.633 27f8 Delete type=0 #4

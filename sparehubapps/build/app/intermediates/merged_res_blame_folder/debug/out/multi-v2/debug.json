@@ -4200,7 +4200,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\farma\\OneDrive\\Documents\\sparehub\\sparehubapps\\android\\app\\src\\main\\res\\values-night\\styles.xml",
+                    "source": "C:\\Users\\farma\\OneDrive\\Documents\\sparehub2\\sparehubapps\\android\\app\\src\\main\\res\\values-night\\styles.xml",
                     "from": {
                         "startLines": "3,14",
                         "startColumns": "4,4",
@@ -6273,25 +6273,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\farma\\OneDrive\\Documents\\sparehub\\sparehubapps\\android\\app\\src\\main\\res\\values\\styles.xml",
-                    "from": {
-                        "startLines": "3,14",
-                        "startColumns": "4,4",
-                        "startOffsets": "176,833",
-                        "endLines": "7,16",
-                        "endColumns": "12,12",
-                        "endOffsets": "484,999"
-                    },
-                    "to": {
-                        "startLines": "1498,1502",
-                        "startColumns": "4,4",
-                        "startOffsets": "94257,94438",
-                        "endLines": "1501,1504",
-                        "endColumns": "12,12",
-                        "endOffsets": "94433,94602"
-                    }
-                },
-                {
                     "source": "C:\\Users\\farma\\.gradle\\caches\\transforms-3\\307aa7cf29848b32468d9bb64a398db3\\transformed\\fragment-1.7.1\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,3,4,5,10",
@@ -6325,6 +6306,25 @@
                         "startOffsets": "3726,3784,3850,3913,12493,12564,23776,23901,23968,24047",
                         "endColumns": "57,65,62,61,70,71,67,66,78,68",
                         "endOffsets": "3779,3845,3908,3970,12559,12631,23839,23963,24042,24111"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\farma\\OneDrive\\Documents\\sparehub2\\sparehubapps\\android\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "3,14",
+                        "startColumns": "4,4",
+                        "startOffsets": "176,833",
+                        "endLines": "7,16",
+                        "endColumns": "12,12",
+                        "endOffsets": "484,999"
+                    },
+                    "to": {
+                        "startLines": "1498,1502",
+                        "startColumns": "4,4",
+                        "startOffsets": "94257,94438",
+                        "endLines": "1501,1504",
+                        "endColumns": "12,12",
+                        "endOffsets": "94433,94602"
                     }
                 },
                 {

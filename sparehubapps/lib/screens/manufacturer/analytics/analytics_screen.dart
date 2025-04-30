@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../providers/manufacturer_provider.dart';
 import '../../../models/order.dart';
 import '../../../widgets/common/common.dart';
@@ -24,7 +25,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    // Defer data loading to after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
   }
 
   Future<void> _loadData() async {
@@ -37,6 +41,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       await Future.wait([
         provider.refreshOrders(),
         provider.refreshProducts(),
+        provider.refreshAnalytics(),
       ]);
     } finally {
       if (mounted) {
@@ -49,10 +54,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: widget.showAppBar
           ? AppBar(
-        title: const Text('Analytics'),
+        title: Text(
+          'Analytics',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: theme.appBarTheme.foregroundColor,
+          ),
+        ),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
+        elevation: theme.appBarTheme.elevation,
         actions: [
           PopupMenuButton<String>(
             initialValue: _selectedPeriod,
@@ -68,8 +83,29 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               'This Year',
             ].map((period) => PopupMenuItem(
               value: period,
-              child: Text(period),
+              child: Text(
+                period,
+                style: GoogleFonts.poppins(),
+              ),
             )).toList(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _selectedPeriod,
+                    style: GoogleFonts.poppins(
+                      color: const Color(0xFFFF9800),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_drop_down,
+                    color: Color(0xFFFF9800),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       )
@@ -77,6 +113,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Material(
           elevation: 4,
+          color: theme.appBarTheme.backgroundColor,
           child: Container(
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -94,15 +131,26 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 'This Year',
               ].map((period) => PopupMenuItem(
                 value: period,
-                child: Text(period),
+                child: Text(
+                  period,
+                  style: GoogleFonts.poppins(),
+                ),
               )).toList(),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(_selectedPeriod),
-                    const Icon(Icons.arrow_drop_down),
+                    Text(
+                      _selectedPeriod,
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFFFF9800),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_drop_down,
+                      color: Color(0xFFFF9800),
+                    ),
                   ],
                 ),
               ),
@@ -135,7 +183,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           child: _buildStatCard(
                             context,
                             title: 'Total Revenue',
-                            value: '₹${provider.totalRevenue.toStringAsFixed(2)}',
+                            value: '₹${(provider.totalRevenue / 100000).toStringAsFixed(1)}L',
                             icon: Icons.currency_rupee,
                             color: Colors.green,
                           ),
@@ -185,19 +233,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       chart: LineChart(
                         LineChartData(
                           gridData: FlGridData(show: false),
-                          titlesData: FlTitlesData(show: false),
+                          titlesData: FlTitlesData(show: true),
                           borderData: FlBorderData(show: false),
                           lineBarsData: [
                             LineChartBarData(
-                              spots: _generateRevenueData(provider.orders),
+                              spots: _generateRevenueData(provider.analytics ?? []),
                               isCurved: true,
-                              color: Theme.of(context).primaryColor,
+                              color: theme.primaryColor,
                               barWidth: 3,
                               isStrokeCapRound: true,
                               dotData: FlDotData(show: false),
                               belowBarData: BarAreaData(
                                 show: true,
-                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                color: theme.primaryColor.withOpacity(0.1),
                               ),
                             ),
                           ],
@@ -222,6 +270,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     const SizedBox(height: 32),
                     // Top Products
                     Card(
+                      elevation: theme.cardTheme.elevation,
+                      shape: theme.cardTheme.shape,
+                      color: theme.cardTheme.color,
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -229,12 +280,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           children: [
                             Text(
                               'Top Products',
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const SizedBox(height: 16),
-                            ...provider.products
-                                .take(5)
-                                .map((product) => ListTile(
+                            ...provider.products.take(5).map((product) => ListTile(
                               leading: Container(
                                 width: 48,
                                 height: 48,
@@ -247,17 +299,28 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                   color: Colors.grey[400],
                                 ),
                               ),
-                              title: Text(product.name),
-                              subtitle: Text('Stock: ${product.stockQuantity}'),
-                              trailing: Text(
-                                '₹${product.price.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.bold,
+                              title: Text(
+                                product.name,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ))
-                                .toList(),
+                              subtitle: Text(
+                                'Stock: ${product.stockQuantity}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              trailing: Text(
+                                '₹${product.price.toStringAsFixed(2)}',
+                                style: GoogleFonts.poppins(
+                                  color: theme.primaryColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            )).toList(),
                           ],
                         ),
                       ),
@@ -279,7 +342,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         required IconData icon,
         required Color color,
       }) {
+    final theme = Theme.of(context);
     return Card(
+      elevation: theme.cardTheme.elevation,
+      shape: theme.cardTheme.shape,
+      color: theme.cardTheme.color,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -292,14 +359,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             const SizedBox(height: 8),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              style: GoogleFonts.poppins(
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: color,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               title,
-              style: TextStyle(
+              style: GoogleFonts.poppins(
+                fontSize: 14,
                 color: Colors.grey[600],
               ),
             ),
@@ -314,7 +384,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         required String title,
         required Widget chart,
       }) {
+    final theme = Theme.of(context);
     return Card(
+      elevation: theme.cardTheme.elevation,
+      shape: theme.cardTheme.shape,
+      color: theme.cardTheme.color,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -322,7 +396,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -335,22 +412,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  List<FlSpot> _generateRevenueData(List<Order> orders) {
-    // TODO: Implement actual revenue data generation
-    return [
-      const FlSpot(0, 3),
-      const FlSpot(1, 1),
-      const FlSpot(2, 4),
-      const FlSpot(3, 2),
-      const FlSpot(4, 5),
-      const FlSpot(5, 3),
-      const FlSpot(6, 4),
-    ];
+  List<FlSpot> _generateRevenueData(List<dynamic> analytics) {
+    // Example: Assume analytics is a list of maps with 'date' and 'revenue'
+    return analytics.asMap().entries.map((entry) {
+      final index = entry.key;
+      final data = entry.value as Map<String, dynamic>;
+      final revenue = (data['revenue'] as num?)?.toDouble() ?? 0.0;
+      return FlSpot(index.toDouble(), revenue);
+    }).toList();
   }
 
   List<PieChartSectionData> _generateOrderStatusData(List<Order> orders) {
     final statusCounts = {
       OrderStatus.pending: orders.where((o) => o.status == OrderStatus.pending).length,
+      OrderStatus.confirmed: orders.where((o) => o.status == OrderStatus.confirmed).length,
       OrderStatus.processing: orders.where((o) => o.status == OrderStatus.processing).length,
       OrderStatus.shipped: orders.where((o) => o.status == OrderStatus.shipped).length,
       OrderStatus.delivered: orders.where((o) => o.status == OrderStatus.delivered).length,
@@ -358,6 +433,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
     final colors = {
       OrderStatus.pending: Colors.orange,
+      OrderStatus.confirmed: Colors.amber,
       OrderStatus.processing: Colors.blue,
       OrderStatus.shipped: Colors.purple,
       OrderStatus.delivered: Colors.green,
@@ -370,7 +446,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         value: percentage.toDouble(),
         title: '${percentage.toStringAsFixed(1)}%',
         radius: 60,
-        titleStyle: const TextStyle(
+        titleStyle: GoogleFonts.poppins(
           color: Colors.white,
           fontWeight: FontWeight.bold,
         ),

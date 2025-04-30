@@ -7,9 +7,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CategorySerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
         fields = ['id', 'name', 'slug', 'image', 'is_active', 'created_at', 'updated_at']
+
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
+        return None
 
 class SubcategorySerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -26,14 +34,18 @@ class BrandSerializer(serializers.ModelSerializer):
         model = Brand
         fields = ['id', 'name', 'logo', 'description', 'is_active', 'created_at', 'updated_at']
 
-
-
 class ProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductImage
         fields = ['id', 'image', 'is_primary', 'created_at']
 
-
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
+        return None
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -52,6 +64,10 @@ class ProductSerializer(serializers.ModelSerializer):
         queryset=User.objects.filter(role='manufacturer'), write_only=True
     )
     images = ProductImageSerializer(many=True, read_only=True)
+    
+    # Explicitly define file fields
+    technical_specification_pdf = serializers.FileField(required=False, allow_null=True)
+    installation_guide_pdf = serializers.FileField(required=False, allow_null=True)
 
     price = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
     discount = serializers.DecimalField(max_digits=5, decimal_places=2, coerce_to_string=False)
@@ -70,17 +86,47 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'is_approved']
 
+    def to_internal_value(self, data):
+        # Log the incoming data for debugging
+        logger.info(f"Received data in to_internal_value: {data}")
+
+        # Convert string IDs to integers for multipart form data
+        mutable_data = data.copy()
+        for field in ['category_id', 'subcategory_id', 'brand_id', 'manufacturer']:
+            if field in mutable_data and mutable_data[field]:
+                try:
+                    value = mutable_data[field]
+                    if isinstance(value, list):
+                        value = value[0]
+                    mutable_data[field] = int(value)
+                except (ValueError, TypeError) as e:
+                    logger.error(f"Error converting {field} to integer: {value}, error: {str(e)}")
+                    raise serializers.ValidationError({field: f'{field.replace("_id", "").title()} ID must be a valid integer.'})
+
+        # Ensure numeric fields are properly converted
+        for field in ['price', 'discount', 'weight', 'shipping_cost', 'stock_quantity', 'min_order_quantity', 'max_order_quantity']:
+            if field in mutable_data and mutable_data[field]:
+                try:
+                    value = mutable_data[field]
+                    if isinstance(value, list):
+                        value = value[0]
+                    mutable_data[field] = float(value)
+                except (ValueError, TypeError) as e:
+                    logger.error(f"Error converting {field} to float: {value}, error: {str(e)}")
+                    raise serializers.ValidationError({field: f'{field.replace("_", " ").title()} must be a valid number.'})
+
+        try:
+            return super().to_internal_value(mutable_data)
+        except Exception as e:
+            logger.error(f"Error in to_internal_value: {str(e)}")
+            raise serializers.ValidationError({'non_field_errors': [str(e)]})
+
     def validate(self, data):
-        """
-        Validate product data with improved error handling
-        """
         errors = {}
         
         try:
-            # Log incoming data
             logger.info('Validating product data: %s', data)
             
-            # Check manufacturer role first
             manufacturer = data.get('manufacturer')
             if not manufacturer:
                 errors['manufacturer'] = 'Manufacturer is required.'
@@ -88,12 +134,11 @@ class ProductSerializer(serializers.ModelSerializer):
                 errors['manufacturer'] = 'Invalid manufacturer or user is not a manufacturer.'
                 logger.error('Invalid manufacturer role for user ID: %s', getattr(manufacturer, 'id', None))
 
-            # Validate required fields
             required_fields = {
                 'name': 'Product name',
                 'sku': 'SKU',
-                'category_id': 'Category',
-                'subcategory_id': 'Subcategory',
+                'category': 'Category',
+                'subcategory': 'Subcategory',
                 'price': 'Price',
                 'weight': 'Weight'
             }
@@ -103,7 +148,6 @@ class ProductSerializer(serializers.ModelSerializer):
                     errors[field] = f'{label} is required.'
                     logger.error('Missing required field: %s', field)
 
-            # Validate SKU uniqueness
             sku = data.get('sku')
             if sku:
                 sku_query = Product.objects.filter(sku=sku)
@@ -113,19 +157,17 @@ class ProductSerializer(serializers.ModelSerializer):
                     errors['sku'] = 'This SKU is already in use.'
                     logger.error('Duplicate SKU found: %s', sku)
 
-            # Validate category and subcategory relationship
-            category = data.get('category_id')
-            subcategory = data.get('subcategory_id')
+            category = data.get('category')
+            subcategory = data.get('subcategory')
             if category and subcategory:
                 if subcategory.category_id != category.id:
-                    errors['subcategory_id'] = 'Selected subcategory does not belong to the selected category.'
+                    errors['subcategory'] = 'Selected subcategory does not belong to the selected category.'
                     logger.error(
                         'Category mismatch - Category: %s, Subcategory: %s',
                         category.id,
                         subcategory.id
                     )
 
-            # Validate numeric fields
             numeric_fields = {
                 'price': ('Price', 0),
                 'weight': ('Weight', 0),
@@ -139,7 +181,6 @@ class ProductSerializer(serializers.ModelSerializer):
                     errors[field] = f'{label} must be greater than or equal to {min_value}.'
                     logger.error('Invalid %s value: %s', field, value)
 
-            # Validate max order quantity
             max_order = data.get('max_order_quantity')
             min_order = data.get('min_order_quantity')
             if max_order is not None and min_order is not None:
@@ -148,6 +189,7 @@ class ProductSerializer(serializers.ModelSerializer):
                     logger.error('Invalid order quantity range: min=%s, max=%s', min_order, max_order)
 
             if errors:
+                logger.error(f"Validation errors: {errors}")
                 raise serializers.ValidationError(errors)
 
             return data
@@ -155,7 +197,7 @@ class ProductSerializer(serializers.ModelSerializer):
         except Exception as e:
             logger.error('Unexpected error during product validation: %s', str(e))
             raise serializers.ValidationError({
-                'non_field_errors': ['An unexpected error occurred while validating the product.']
+                'non_field_errors': ['An unexpected error occurred while validating the product: %s' % str(e)]
             })
 
     def create(self, validated_data):
@@ -163,16 +205,15 @@ class ProductSerializer(serializers.ModelSerializer):
         
         try:
             with transaction.atomic():
-                # Extract data that needs special handling
                 manufacturer = validated_data.pop('manufacturer')
+                technical_pdf = validated_data.pop('technical_specification_pdf', None)
+                installation_pdf = validated_data.pop('installation_guide_pdf', None)
                 
-                # Get files from request context
                 request_files = self.context.get('request').FILES
                 images = request_files.getlist('images', [])
-                technical_pdf = request_files.get('technical_specification_pdf')
-                installation_pdf = request_files.get('installation_guide_pdf')
+                technical_pdf = request_files.get('technical_specification_pdf', technical_pdf)
+                installation_pdf = request_files.get('installation_guide_pdf', installation_pdf)
 
-                # Validate file types
                 for image in images:
                     if not image.content_type.startswith('image/'):
                         raise serializers.ValidationError({
@@ -185,14 +226,12 @@ class ProductSerializer(serializers.ModelSerializer):
                             'pdf': f'Invalid file type for {pdf.name}. Only PDF files are allowed.'
                         })
 
-                # Log the creation attempt
                 logger.info(
                     'Creating product: manufacturer=%s, sku=%s',
                     manufacturer.id,
                     validated_data.get('sku')
                 )
 
-                # Create the product
                 product = Product.objects.create(
                     manufacturer=manufacturer,
                     technical_specification_pdf=technical_pdf,
@@ -200,8 +239,6 @@ class ProductSerializer(serializers.ModelSerializer):
                     **validated_data
                 )
 
-              
-                # Add images
                 if images:
                     image_objects = []
                     for index, image in enumerate(images):
@@ -209,7 +246,7 @@ class ProductSerializer(serializers.ModelSerializer):
                             ProductImage(
                                 product=product,
                                 image=image,
-                                is_primary=(index == 0)  # First image is primary
+                                is_primary=(index == 0)
                             )
                         )
                     ProductImage.objects.bulk_create(image_objects)
@@ -230,7 +267,7 @@ class ProductSerializer(serializers.ModelSerializer):
             )
             raise serializers.ValidationError({
                 'non_field_errors': [
-                    'Failed to create product. Please try again.'
+                    'Failed to create product: %s' % str(e)
                 ]
             })
 
@@ -239,15 +276,11 @@ class ProductSerializer(serializers.ModelSerializer):
         
         try:
             with transaction.atomic():
-                # Extract data that needs special handling
-                
-                # Get files from request context
                 request_files = self.context.get('request').FILES
                 images = request_files.getlist('images', [])
-                technical_pdf = request_files.get('technical_specification_pdf')
-                installation_pdf = request_files.get('installation_guide_pdf')
+                technical_pdf = validated_data.pop('technical_specification_pdf', request_files.get('technical_specification_pdf', None))
+                installation_pdf = validated_data.pop('installation_guide_pdf', request_files.get('installation_guide_pdf', None))
 
-                # Validate file types
                 for image in images:
                     if not image.content_type.startswith('image/'):
                         raise serializers.ValidationError({
@@ -260,18 +293,15 @@ class ProductSerializer(serializers.ModelSerializer):
                             'pdf': f'Invalid file type for {pdf.name}. Only PDF files are allowed.'
                         })
 
-                # Log the update attempt
                 logger.info(
                     'Updating product: id=%s, sku=%s',
                     instance.id,
                     instance.sku
                 )
 
-                # Update product fields
                 for attr, value in validated_data.items():
                     setattr(instance, attr, value)
 
-                # Update PDFs if provided
                 if technical_pdf:
                     instance.technical_specification_pdf = technical_pdf
                 if installation_pdf:
@@ -279,20 +309,16 @@ class ProductSerializer(serializers.ModelSerializer):
 
                 instance.save()
 
-               
-                # Update images if provided
                 if images:
-                    # Delete existing images
                     instance.images.all().delete()
                     
-                    # Add new images
                     image_objects = []
                     for index, image in enumerate(images):
                         image_objects.append(
                             ProductImage(
                                 product=instance,
                                 image=image,
-                                is_primary=(index == 0)  # First image is primary
+                                is_primary=(index == 0)
                             )
                         )
                     ProductImage.objects.bulk_create(image_objects)
@@ -314,6 +340,6 @@ class ProductSerializer(serializers.ModelSerializer):
             )
             raise serializers.ValidationError({
                 'non_field_errors': [
-                    'Failed to update product. Please try again.'
+                    'Failed to update product: %s' % str(e)
                 ]
             })

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class Category {
   final int id;
   final String name;
@@ -39,9 +41,9 @@ class Category {
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'],
-      name: json['name'],
-      slug: json['slug'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      slug: json['slug'] ?? '',
       image: json['image'],
       isActive: json['is_active'] ?? true,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
