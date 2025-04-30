@@ -37,6 +37,13 @@ dev_dependencies:
   mockito: ^5.4.4
   build_runner: ^2.4.11
   json_serializable: ^6.7.1
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logos/sparehub_ic_logo.png"
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true

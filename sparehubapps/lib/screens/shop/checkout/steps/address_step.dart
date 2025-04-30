@@ -5,8 +5,8 @@ import '../../../../models/address.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../providers/checkout_provider.dart';
 import '../../../../providers/address_provider.dart';
-import '../checkout_screen.dart';
 import '../../../../services/api_service.dart';
+import '../checkout_screen.dart';
 
 class AddressStep extends StatelessWidget {
   const AddressStep({super.key});
@@ -40,9 +40,11 @@ class AddressStep extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () => addressProvider.refreshAddresses(),
                     style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                      backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
-                      foregroundColor: MaterialStateProperty.all(Colors.white),
-                    ),
+                          backgroundColor:
+                              MaterialStateProperty.all(const Color(0xFFFF9800)),
+                          foregroundColor:
+                              MaterialStateProperty.all(Colors.white),
+                        ),
                     child: Text(
                       'Retry',
                       style: GoogleFonts.poppins(
@@ -114,9 +116,11 @@ class AddressStep extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: () => _showAddAddressBottomSheet(context),
                         style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                          backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
-                          foregroundColor: MaterialStateProperty.all(Colors.white),
-                        ),
+                              backgroundColor:
+                                  MaterialStateProperty.all(const Color(0xFFFF9800)),
+                              foregroundColor:
+                                  MaterialStateProperty.all(Colors.white),
+                            ),
                         icon: const Icon(Icons.add),
                         label: Text(
                           'Add New Address',
@@ -145,7 +149,7 @@ class AddressStep extends StatelessWidget {
               ),
               child: CheckoutButton(
                 label: 'Continue to Payment',
-                onPressed: () => checkoutProvider.nextStep(),
+                onPressed: () => checkoutProvider.nextStep(context), // FIXED: Pass context
                 enabled: checkoutProvider.canProceedToPayment,
               ),
             ),
@@ -307,8 +311,12 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      // Unfocus the keyboard to dismiss it
+      FocusScope.of(context).unfocus();
+
       final authProvider = context.read<AuthProvider>();
-      if (authProvider.status != AuthStatus.authenticated || authProvider.currentUser == null) {
+      if (authProvider.status != AuthStatus.authenticated ||
+          authProvider.currentUser == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -331,7 +339,7 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
             : _addressLine2Controller.text,
         city: _cityController.text,
         state: _stateController.text,
-        pincode: _pincodeController.text,
+        pincode: _phoneController.text,
         country: 'India',
         type: _addressType,
         isDefault: _isDefault,
@@ -339,46 +347,51 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
 
       try {
         final result = await context.read<CheckoutProvider>().addNewAddress(address);
-        if (context.mounted) {
-          if (result) {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Address added successfully',
-                  style: GoogleFonts.poppins(),
-                ),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Failed to add address',
-                  style: GoogleFonts.poppins(),
-                ),
-                backgroundColor: Colors.red[700],
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        String errorMessage = 'Failed to add address';
-        if (e is ApiException) {
-          errorMessage = e.message;
-        }
-        if (context.mounted) {
+        debugPrint('SubmitForm result: $result');
+        if (result) {
+          // Close the bottom sheet
+          Navigator.pop(context);
+          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                errorMessage,
+                'Address added successfully',
+                style: GoogleFonts.poppins(),
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Failed to add address',
                 style: GoogleFonts.poppins(),
               ),
               backgroundColor: Colors.red[700],
             ),
           );
         }
+      } catch (e) {
+        String errorMessage = 'Failed to add address';
+        if (e is ApiException) {
+          if (e.message.contains('address_line1')) {
+            errorMessage = 'Please provide a valid address (at least 3 characters)';
+          } else {
+            errorMessage = e.message;
+          }
+        } else {
+          errorMessage = 'An unexpected error occurred. Please try again.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              errorMessage,
+              style: GoogleFonts.poppins(),
+            ),
+            backgroundColor: Colors.red[700],
+          ),
+        );
       }
     }
   }
@@ -491,6 +504,9 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
                             if (value?.isEmpty ?? true) {
                               return 'Please enter your address';
                             }
+                            if (value!.length < 3) {
+                              return 'Address must be at least 3 characters long';
+                            }
                             return null;
                           },
                         ),
@@ -515,7 +531,8 @@ class _AddAddressSheetState extends State<_AddAddressSheet> {
                                 controller: _cityController,
                                 decoration: InputDecoration(
                                   labelText: 'City',
-                                  prefixIcon: const Icon(Icons.location_city_outlined),
+                                  prefixIcon:
+                                      const Icon(Icons.location_city_outlined),
                                   labelStyle: GoogleFonts.poppins(),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),

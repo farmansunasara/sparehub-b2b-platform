@@ -1,5 +1,4 @@
 from django.db import models
-from django.db import models
 from users.models import User
 
 class AddressType(models.TextChoices):
@@ -11,6 +10,7 @@ class Address(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=20)
+    # NEW: Remove blank=True to make address_line1 required
     address_line1 = models.TextField()
     address_line2 = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100)

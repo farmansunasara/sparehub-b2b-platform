@@ -11,6 +11,7 @@ enum AddressType {
 
 @JsonSerializable()
 class Address {
+  @JsonKey(fromJson: _idFromJson)
   final String? id;
   @JsonKey(name: 'user_id')
   final String? userId; // Matches Django's user_id or user
@@ -102,6 +103,12 @@ class Address {
       pincode: pincode,
       country: country,
     );
+  }
+
+  static String? _idFromJson(dynamic value) {
+    // NEW: Handle int or String for id
+    if (value == null) return null;
+    return value.toString();
   }
 
   static AddressType _addressTypeFromJson(String json) {

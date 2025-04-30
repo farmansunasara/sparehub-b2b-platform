@@ -162,7 +162,7 @@ class PaymentStep extends StatelessWidget {
               ),
               child: CheckoutButton(
                 label: 'Continue to Confirmation',
-                onPressed: () => provider.nextStep(),
+                onPressed: () => provider.nextStep(context), // FIXED: Pass context
                 enabled: provider.canProceedToConfirmation,
               ),
             ),

@@ -1,17 +1,15 @@
 import 'package:flutter/foundation.dart';
-import '../models/order.dart';
 import '../models/cart.dart';
+import '../models/order.dart';
 import '../services/api_service.dart';
 
-class OrderProvider extends ChangeNotifier {
+class OrderProvider with ChangeNotifier {
   final ApiService _apiService;
+
   List<Order> _orders = [];
   Order? _currentOrder;
   bool _isLoading = false;
   String? _error;
-  bool _hasMoreOrders = true;
-  int _currentPage = 1;
-  static const int _pageSize = 5;
 
   OrderProvider(this._apiService);
 
@@ -19,46 +17,58 @@ class OrderProvider extends ChangeNotifier {
   Order? get currentOrder => _currentOrder;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  bool get hasMoreOrders => _hasMoreOrders;
 
-  List<Order> get pendingOrders => _orders.where((order) {
-    return [
-      OrderStatus.pending,
-      OrderStatus.confirmed,
-      OrderStatus.processing,
-      OrderStatus.shipped
-    ].contains(order.status);
-  }).toList();
+  List<Order> get pendingOrders => _orders.where((order) =>
+      order.status == OrderStatus.pending ||
+      order.status == OrderStatus.confirmed ||
+      order.status == OrderStatus.processing ||
+      order.status == OrderStatus.shipped).toList();
 
-  List<Order> get completedOrders => _orders.where((order) {
-    return [
-      OrderStatus.delivered,
-      OrderStatus.cancelled,
-      OrderStatus.returned
-    ].contains(order.status);
-  }).toList();
+  List<Order> get completedOrders => _orders.where((order) =>
+      order.status == OrderStatus.delivered ||
+      order.status == OrderStatus.cancelled ||
+      order.status == OrderStatus.returned).toList();
 
-  Future<void> refreshOrders({bool reset = false}) async {
-    if (_isLoading) return;
-    if (reset) {
-      _currentPage = 1;
-      _orders = [];
-      _hasMoreOrders = true;
-    }
-    _setLoading(true);
+  Future<void> refreshOrders() async {
+    await fetchOrders();
+  }
+
+  Future<void> fetchOrders() async {
     try {
-      final response = await _apiService.getShopOrders(limit: _pageSize);
-      final newOrders = response.map((json) => Order.fromJson(json)).toList();
-      if (newOrders.length < _pageSize) {
-        _hasMoreOrders = false;
-      }
-      _orders = reset ? newOrders : [..._orders, ...newOrders];
+      _isLoading = true;
       _error = null;
-      _currentPage++;
+      notifyListeners();
+
+      final response = await _apiService.getOrders();
+      _orders = response.map((json) => Order.fromJson(json)).toList();
+      notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      debugPrint('Error fetching orders: $e');
+      _error = 'Failed to fetch orders';
+      notifyListeners();
     } finally {
-      _setLoading(false);
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Order?> getOrderById(String orderId) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final response = await _apiService.getOrder(orderId);
+      final order = Order.fromJson(response);
+      return order;
+    } catch (e) {
+      debugPrint('Error fetching order $orderId: $e');
+      _error = 'Failed to fetch order';
+      notifyListeners();
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -70,110 +80,196 @@ class OrderProvider extends ChangeNotifier {
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      _setLoading(true);
+      _isLoading = true;
       _error = null;
+      notifyListeners();
 
-      final orderData = {
-        'items': cart.items.map((item) => {
-          'product': item.product.id,
-          'quantity': item.quantity,
-        }).toList(),
-        'shipping_address': {
-          'name': shippingAddress.name,
-          'phone': shippingAddress.phone,
-          'address': shippingAddress.formattedAddress,
+      final orderPayload = {
+        'items': cart.items
+            .map((item) => {
+                  'product_id': item.product.id,
+                  'quantity': item.quantity,
+                  'price': item.product.price,
+                })
+            .toList(),
+        'shipping_address': shippingAddress.toJson(),
+        'billing_address': billingAddress?.toJson(),
+        'payment': {
+          'method': paymentMethod.toString().split('.').last,
+          'status': 'pending',
+          'amount': cart.total,
+          'timestamp': DateTime.now().toIso8601String(),
         },
-        if (billingAddress != null)
-          'billing_address': {
-            'name': billingAddress.name,
-            'phone': billingAddress.phone,
-            'address': billingAddress.formattedAddress,
-          },
-        'payment_method': paymentMethod.toString().split('.').last,
-        if (metadata != null) 'metadata': metadata,
+        'status': 'pending',
+        'subtotal': cart.total,
+        'tax': cart.total * 0.18,
+        'shipping_cost': cart.items.fold<double>(
+          0,
+          (sum, item) => sum + (item.product.shippingCost * item.quantity),
+        ),
+        'total': cart.total +
+            (cart.total * 0.18) +
+            cart.items.fold<double>(
+              0,
+              (sum, item) => sum + (item.product.shippingCost * item.quantity),
+            ),
+        'metadata': metadata,
       };
 
-      final response = await _apiService.createOrder(orderData);
+      debugPrint('Creating order with payload: $orderPayload');
+
+      final response = await _apiService.createOrder(orderPayload);
+      debugPrint('Create order response: $response');
+      if (response == null) {
+        debugPrint('Error: API response is null');
+        throw Exception('Failed to create order: Null response');
+      }
       final order = Order.fromJson(response);
+      _orders.add(order);
       _currentOrder = order;
-      _orders = [order, ..._orders];
+      notifyListeners();
       return order;
     } catch (e) {
-      _error = e.toString();
+      debugPrint('Error creating order: $e');
+      _error = 'Failed to create order';
+      notifyListeners();
       return null;
     } finally {
-      _setLoading(false);
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
-  Future<Order?> getOrderById(String orderId) async {
+  Future<Order?> createOrderFromPayload(Map<String, dynamic> payload) async {
     try {
-      _setLoading(true);
+      _isLoading = true;
       _error = null;
+      notifyListeners();
 
-      final response = await _apiService.getOrder(orderId);
-      final order = Order.fromJson(response);
+      final response = await _apiService.createOrder(payload);
+      debugPrint('Create order from payload response: $response'); // Log raw response
+      Order order;
+      if (response == null || response.isEmpty) {
+        debugPrint('Warning: API response is null or empty, creating minimal Order');
+        // Create a minimal Order object from payload
+        order = Order(
+          id: 'temp_${DateTime.now().millisecondsSinceEpoch}', // Temporary ID
+          userId: payload['user'].toString(),
+          shopName: payload['shop_name'] ?? 'SpareHub Shop',
+          items: (payload['items'] as List<dynamic>)
+              .map((item) => CartItem.fromJson({
+                    'product': {
+                      'id': item['product_id'],
+                      'price': item['price'],
+                      'name': 'Unknown Product', // Fallback name
+                    },
+                    'quantity': item['quantity'],
+                  }))
+              .toList(),
+          shippingAddress: OrderAddress.fromJson(payload['shipping_address']),
+          billingAddress: payload['billing_address'] != null
+              ? OrderAddress.fromJson(payload['billing_address'])
+              : null,
+          payment: OrderPayment.fromJson({
+            ...payload['payment'],
+            'id': 'temp_${DateTime.now().millisecondsSinceEpoch}', // Temporary payment ID
+          }),
+          status: OrderStatus.pending,
+          subtotal: payload['subtotal']?.toDouble() ?? 0.0,
+          tax: payload['tax']?.toDouble() ?? 0.0,
+          shippingCost: payload['shipping_cost']?.toDouble() ?? 0.0,
+          total: payload['total']?.toDouble() ?? 0.0,
+          createdAt: DateTime.now(),
+          statusUpdates: [],
+          metadata: payload['metadata'],
+        );
+      } else if (response is! Map<String, dynamic>) {
+        debugPrint('Error: Unexpected response type: ${response.runtimeType}');
+        throw Exception('Failed to create order: Invalid response format');
+      } else {
+        order = Order.fromJson(response);
+      }
+      _orders.add(order);
+      _currentOrder = order;
+      notifyListeners();
       return order;
     } catch (e) {
-      _error = e.toString();
+      debugPrint('Error creating order from payload: $e');
+      _error = 'Failed to create order: ${e.toString()}';
+      notifyListeners();
       return null;
     } finally {
-      _setLoading(false);
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateOrderStatus(String orderId, OrderStatus status,
+      {String? comment}) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final response = await _apiService.updateOrderStatus(
+        orderId,
+        status.toString().split('.').last,
+        comment: comment,
+      );
+      final updatedOrder = Order.fromJson(response);
+      final index = _orders.indexWhere((order) => order.id == orderId);
+      if (index != -1) {
+        _orders[index] = updatedOrder;
+      }
+      if (_currentOrder?.id == orderId) {
+        _currentOrder = updatedOrder;
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating order status: $e');
+      _error = 'Failed to update order status';
+      notifyListeners();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<bool> cancelOrder(String orderId, {String? reason}) async {
     try {
-      _setLoading(true);
-      _error = null;
-
-      await _apiService.updateOrderStatus(
+      await updateOrderStatus(
         orderId,
-        OrderStatus.cancelled.toString().split('.').last,
-        comment: reason,
+        OrderStatus.cancelled,
+        comment: reason ?? 'Order cancelled by user',
       );
-      await refreshOrders(reset: true);
       return true;
     } catch (e) {
-      _error = e.toString();
+      debugPrint('Error cancelling order $orderId: $e');
       return false;
-    } finally {
-      _setLoading(false);
     }
   }
 
-  Future<bool> returnOrder(String orderId, {required String reason}) async {
+  Future<bool> returnOrder(String orderId, {String? reason}) async {
     try {
-      _setLoading(true);
-      _error = null;
-
-      await _apiService.updateOrderStatus(
+      await updateOrderStatus(
         orderId,
-        OrderStatus.returned.toString().split('.').last,
-        comment: reason,
+        OrderStatus.returned,
+        comment: reason ?? 'Order returned by user',
       );
-      await refreshOrders(reset: true);
       return true;
     } catch (e) {
-      _error = e.toString();
+      debugPrint('Error returning order $orderId: $e');
       return false;
-    } finally {
-      _setLoading(false);
     }
   }
 
-  void _setLoading(bool value) {
-    if (!_disposed) {
-      _isLoading = value;
-      notifyListeners();
-    }
+  void clearError() {
+    _error = null;
+    notifyListeners();
   }
 
-  bool _disposed = false;
-
-  @override
-  void dispose() {
-    _disposed = true;
-    super.dispose();
+  void setCurrentOrder(Order order) {
+    _currentOrder = order;
+    notifyListeners();
   }
 }

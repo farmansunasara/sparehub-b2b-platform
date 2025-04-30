@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/order.dart';
 import '../models/address.dart';
 import '../models/cart.dart';
 import 'cart_provider.dart';
 import 'address_provider.dart';
 import 'order_provider.dart';
+import 'auth_provider.dart';
 
 enum CheckoutStep {
   address,
@@ -17,6 +20,7 @@ class CheckoutProvider with ChangeNotifier {
   final CartProvider _cartProvider;
   final AddressProvider _addressProvider;
   final OrderProvider _orderProvider;
+  final AuthProvider _authProvider;
 
   CheckoutStep _currentStep = CheckoutStep.address;
   PaymentMethod _selectedPaymentMethod = PaymentMethod.cod;
@@ -31,10 +35,11 @@ class CheckoutProvider with ChangeNotifier {
   double _total = 0;
 
   CheckoutProvider(
-      this._cartProvider,
-      this._addressProvider,
-      this._orderProvider,
-      ) {
+    this._cartProvider,
+    this._addressProvider,
+    this._orderProvider,
+    this._authProvider,
+  ) {
     // Initialize order summary
     _calculateOrderSummary();
   }
@@ -63,9 +68,9 @@ class CheckoutProvider with ChangeNotifier {
 
   bool get canPlaceOrder =>
       currentStep == CheckoutStep.confirmation &&
-          selectedShippingAddress != null &&
-          selectedPaymentMethod != null &&
-          !_isLoading;
+      selectedShippingAddress != null &&
+      selectedPaymentMethod != null &&
+      !_isLoading;
 
   // Calculate order summary
   void _calculateOrderSummary() {
@@ -73,7 +78,7 @@ class CheckoutProvider with ChangeNotifier {
     _tax = _subtotal * 0.18; // 18% GST
     _shippingCost = _cartProvider.cart.items.fold<double>(
       0,
-          (sum, item) => sum + (item.product.shippingCost * item.quantity),
+      (sum, item) => sum + (item.product.shippingCost * item.quantity),
     );
     _total = _subtotal + _tax + _shippingCost;
     notifyListeners();
@@ -85,7 +90,7 @@ class CheckoutProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void nextStep() {
+  void nextStep(BuildContext context) {
     switch (_currentStep) {
       case CheckoutStep.address:
         if (canProceedToPayment) {
@@ -99,7 +104,7 @@ class CheckoutProvider with ChangeNotifier {
         break;
       case CheckoutStep.confirmation:
         if (canPlaceOrder) {
-          placeOrder();
+          placeOrder(context: context);
         }
         break;
       case CheckoutStep.complete:
@@ -131,9 +136,30 @@ class CheckoutProvider with ChangeNotifier {
   }
 
   Future<bool> addNewAddress(Address address) async {
+    debugPrint('Adding new address: ${address.name}, ${address.phone}');
     final result = await _addressProvider.addAddress(address);
+    debugPrint('addNewAddress result: $result');
     if (result) {
-      selectShippingAddress(address.id!);
+      // Refresh addresses and ensure the new address is fetched
+      await _addressProvider.refreshAddresses();
+      // Log the current addresses to debug
+      debugPrint('Addresses after refresh: ${_addressProvider.addresses.map((a) => "${a.id}: ${a.name}, ${a.phone}").toList()}');
+      // Find the newly added address by matching properties
+      final newAddress = _addressProvider.addresses.lastWhere(
+        (a) =>
+            a.name == address.name &&
+            a.phone == address.phone &&
+            a.addressLine1 == address.addressLine1,
+        orElse: () => address,
+      );
+      if (newAddress.id != null) {
+        debugPrint('Selecting new address with ID: ${newAddress.id}');
+        selectShippingAddress(newAddress.id!);
+      } else {
+        debugPrint('New address ID is null');
+      }
+    } else {
+      debugPrint('Failed to add address');
     }
     return result;
   }
@@ -150,23 +176,58 @@ class CheckoutProvider with ChangeNotifier {
   }
 
   // Place order
-  Future<Order?> placeOrder() async {
-    if (!canPlaceOrder) return null;
+  Future<Order?> placeOrder({required BuildContext context}) async {
+    if (!canPlaceOrder) {
+      debugPrint('Cannot place order: conditions not met');
+      return null;
+    }
 
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
 
-      final order = await _orderProvider.createOrder(
-        cart: _cartProvider.cart,
-        shippingAddress: selectedShippingAddress!.toOrderAddress(),
-        billingAddress: _useShippingAsBilling ? null : selectedShippingAddress!.toOrderAddress(),
-        paymentMethod: _selectedPaymentMethod,
-        metadata: {
+      // Get userId from AuthProvider
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.status != AuthStatus.authenticated || authProvider.currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+      final userId = authProvider.currentUser!.id.toString();
+
+      // Construct a complete order payload
+      final orderPayload = {
+        'user': userId, // FIXED: Changed back to 'user' to match backend
+        'shop_name': 'SpareHub Shop',
+        'items': _cartProvider.cart.items
+            .map((item) => {
+                  'product_id': item.product.id,
+                  'quantity': item.quantity,
+                  'price': item.product.price,
+                })
+            .toList(),
+        'shipping_address': selectedShippingAddress!.toOrderAddress().toJson(),
+        'billing_address': _useShippingAsBilling
+            ? null
+            : selectedShippingAddress!.toOrderAddress().toJson(),
+        'payment': {
+          'method': _selectedPaymentMethod.toString().split('.').last,
+          'status': 'pending',
+          'amount': _total,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+        'status': 'pending',
+        'subtotal': _subtotal,
+        'tax': _tax,
+        'shipping_cost': _shippingCost,
+        'total': _total,
+        'metadata': {
           'checkout_timestamp': DateTime.now().toIso8601String(),
         },
-      );
+      };
+
+      debugPrint('Order payload: $orderPayload');
+
+      final order = await _orderProvider.createOrderFromPayload(orderPayload);
 
       if (order != null) {
         // Clear cart and move to complete step
@@ -179,7 +240,7 @@ class CheckoutProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error placing order: $e');
-      _error = 'Failed to place order';
+      _error = 'Failed to place order: ${e.toString()}';
       notifyListeners();
       return null;
     } finally {

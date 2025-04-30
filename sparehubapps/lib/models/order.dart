@@ -120,14 +120,14 @@ class OrderAddress {
   @override
   int get hashCode {
     return name.hashCode ^
-    phone.hashCode ^
-    addressLine1.hashCode ^
-    addressLine2.hashCode ^
-    city.hashCode ^
-    state.hashCode ^
-    pincode.hashCode ^
-    country.hashCode ^
-    isDefault.hashCode;
+        phone.hashCode ^
+        addressLine1.hashCode ^
+        addressLine2.hashCode ^
+        city.hashCode ^
+        state.hashCode ^
+        pincode.hashCode ^
+        country.hashCode ^
+        isDefault.hashCode;
   }
 
   String get formattedAddress {
@@ -177,7 +177,7 @@ class OrderPayment {
 
   factory OrderPayment.fromJson(Map<String, dynamic> json) {
     return OrderPayment(
-      id: json['id'].toString(),
+      id: json['id']?.toString() ?? 'temp_${DateTime.now().millisecondsSinceEpoch}',
       method: PaymentMethod.values.firstWhere(
             (e) => e.toString().split('.').last == json['method'].toLowerCase(),
         orElse: () => PaymentMethod.cod,
@@ -186,7 +186,9 @@ class OrderPayment {
             (e) => e.toString().split('.').last == json['status'].toLowerCase(),
         orElse: () => PaymentStatus.pending,
       ),
-      amount: (json['amount'] as num).toDouble(),
+      amount: (json['amount'] is num
+          ? json['amount']
+          : double.parse(json['amount'].toString())).toDouble(),
       transactionId: json['transaction_id'],
       timestamp: DateTime.parse(json['timestamp']),
       metadata: json['metadata'],
@@ -229,12 +231,12 @@ class OrderPayment {
   @override
   int get hashCode {
     return id.hashCode ^
-    method.hashCode ^
-    status.hashCode ^
-    amount.hashCode ^
-    transactionId.hashCode ^
-    timestamp.hashCode ^
-    metadata.hashCode;
+        method.hashCode ^
+        status.hashCode ^
+        amount.hashCode ^
+        transactionId.hashCode ^
+        timestamp.hashCode ^
+        metadata.hashCode;
   }
 }
 
@@ -299,9 +301,11 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       id: json['id'].toString(),
-      userId: json['user_id'].toString(),
+      userId: json['user']?.toString() ?? json['user_id']?.toString() ?? '',
       shopName: json['shop_name'] ?? 'Unknown Shop',
-      items: (json['items'] as List).map((item) => CartItem.fromJson(item)).toList(),
+      items: (json['items'] as List<dynamic>)
+          .map((item) => CartItem.fromJson(item))
+          .toList(),
       shippingAddress: OrderAddress.fromJson(json['shipping_address']),
       billingAddress: json['billing_address'] != null
           ? OrderAddress.fromJson(json['billing_address'])
@@ -311,13 +315,21 @@ class Order {
             (e) => e.toString().split('.').last.toLowerCase() == json['status'].toString().toLowerCase(),
         orElse: () => OrderStatus.pending,
       ),
-      subtotal: (json['subtotal'] as num).toDouble(),
-      tax: (json['tax'] as num).toDouble(),
-      shippingCost: (json['shipping_cost'] as num).toDouble(),
-      total: (json['total'] as num).toDouble(),
+      subtotal: (json['subtotal'] is num
+          ? json['subtotal']
+          : num.parse(json['subtotal'].toString())).toDouble(),
+      tax: (json['tax'] is num
+          ? json['tax']
+          : num.parse(json['tax'].toString())).toDouble(),
+      shippingCost: (json['shipping_cost'] is num
+          ? json['shipping_cost']
+          : num.parse(json['shipping_cost'].toString())).toDouble(),
+      total: (json['total'] is num
+          ? json['total']
+          : num.parse(json['total'].toString())).toDouble(),
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
-      statusUpdates: (json['status_updates'] as List)
+      statusUpdates: (json['status_updates'] as List<dynamic>)
           .map((update) => OrderStatusUpdate.fromJson(update))
           .toList(),
       metadata: json['metadata'],
@@ -387,21 +399,21 @@ class Order {
   @override
   int get hashCode {
     return id.hashCode ^
-    userId.hashCode ^
-    shopName.hashCode ^
-    items.hashCode ^
-    shippingAddress.hashCode ^
-    billingAddress.hashCode ^
-    payment.hashCode ^
-    status.hashCode ^
-    subtotal.hashCode ^
-    tax.hashCode ^
-    shippingCost.hashCode ^
-    total.hashCode ^
-    createdAt.hashCode ^
-    updatedAt.hashCode ^
-    statusUpdates.hashCode ^
-    metadata.hashCode;
+        userId.hashCode ^
+        shopName.hashCode ^
+        items.hashCode ^
+        shippingAddress.hashCode ^
+        billingAddress.hashCode ^
+        payment.hashCode ^
+        status.hashCode ^
+        subtotal.hashCode ^
+        tax.hashCode ^
+        shippingCost.hashCode ^
+        total.hashCode ^
+        createdAt.hashCode ^
+        updatedAt.hashCode ^
+        statusUpdates.hashCode ^
+        metadata.hashCode;
   }
 
   String get formattedTotal => '₹${total.toStringAsFixed(2)}';

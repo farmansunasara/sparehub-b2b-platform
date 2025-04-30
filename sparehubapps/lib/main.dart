@@ -97,6 +97,7 @@ void main() async {
             Provider.of<CartProvider>(context, listen: false),
             Provider.of<AddressProvider>(context, listen: false),
             Provider.of<OrderProvider>(context, listen: false),
+            Provider.of<AuthProvider>(context, listen: false), // NEW: Add AuthProvider
           ),
         ),
       ],
