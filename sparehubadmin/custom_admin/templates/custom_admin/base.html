@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}SpareHub Admin{% endblock %}</title>
+
+    <!-- Tailwind CSS with custom config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81'
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        },
+                        status: {
+                            success: '#10b981',
+                            warning: '#f59e0b',
+                            error: '#ef4444',
+                            info: '#3b82f6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'custom_admin/css/style.css' %}" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-secondary-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="bg-primary-600 text-white w-64 min-h-screen px-4 py  py-6 hidden lg:block" data-sidebar>
+            <div class="flex items-center mb-8 px-2">
+                <span class="text-2xl font-bold">SpareHub Admin</span>
+            </div>
+
+            <nav>
+                <div class="space-y-2">
+                    <a href="{% url 'custom_admin:dashboard' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-home mr-3"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <a href="{% url 'custom_admin:users' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-users mr-3"></i>
+                        <span>Users</span>
+                    </a>
+
+                    <a href="{% url 'custom_admin:products' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-box mr-3"></i>
+                        <span>Products</span>
+                    </a>
+                    <a href="{% url 'custom_admin:categories' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-box mr-3"></i>
+                        <span>Categories</span>
+                    </a>
+                    <a href="{% url 'custom_admin:subcategories' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-box mr-3"></i>
+                        <span>Subcategories</span>
+                    </a>
+
+                    <a href="{% url 'custom_admin:brands' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-box mr-3"></i>
+                        <span>brands</span>
+                    </a>
+                    
+
+                    <a href="{% url 'custom_admin:orders' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-shopping-cart mr-3"></i>
+                        <span>Orders</span>
+                    </a>
+
+                    <a href="{% url 'custom_admin:analytics' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-chart-bar mr-3"></i>
+                        <span>Analytics</span>
+                    </a>
+
+                    <a href="{% url 'custom_admin:settings' %}" class="sidebar-item flex items-center px-4 py-3 text-white hover:bg-primary-500 rounded-lg transition-colors">
+                        <i class="fas fa-cog mr-3"></i>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-soft">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <button class="text-secondary-500 hover:text-secondary-700 lg:hidden" data-sidebar-toggle>
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-xl font-semibold text-secondary-800">{% block header %}Dashboard{% endblock %}</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button class="text-secondary-500 hover:text-secondary-700 relative">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-status-error text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                                3
+                            </span>
+                        </button>
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center space-x-2 text-secondary-700 hover:text-secondary-900">
+                                <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366F1&color=fff"
+                                     alt="Profile" class="w-8 h-8 rounded-full" />
+                                <span>{{ request.user.username }}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div x-show="open" @click.away="open = false"
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-soft-lg py-1">
+                                <a href="#" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50">
+                                    <i class="fas fa-user mr-2"></i> Profile
+                                </a>
+                                <a href="{% url 'custom_admin:settings' %}" class="block px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50">
+                                    <i class="fas fa-cog mr-2"></i> Settings
+                                </a>
+                                <hr class="my-1" />
+                                <form method="post" action="{% url 'custom_admin:logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-status-error hover:bg-secondary-50">
+                                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="p-6">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-status-success/10 text-status-success{% elif message.tags == 'error' %}bg-status-error/10 text-status-error{% else %}bg-status-info/10 text-status-info{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Theme Configuration -->
+    <script src="{% static 'custom_admin/js/theme.js' %}"></script>
+
+    <!-- Alpine.js -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="{% static 'custom_admin/js/main.js' %}"></script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

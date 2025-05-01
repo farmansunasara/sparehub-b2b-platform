@@ -1,0 +1,28 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block title %}Delete User - SpareHub Admin{% endblock %}
+
+{% block header %}Delete User{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+    <h2 class="text-2xl font-semibold text-secondary-800 mb-4">Confirm User Deletion</h2>
+    <p class="text-secondary-600 mb-6">
+        Are you sure you want to delete the user <strong>{{ user.username }}</strong>? 
+        This action cannot be undone.
+    </p>
+    <form method="post" action="{% url 'custom_admin:user_delete' user.id %}">
+        {% csrf_token %}
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'custom_admin:user_detail' user.id %}" 
+               class="px-4 py-2 text-secondary-600 hover:text-secondary-800">
+                Cancel
+            </a>
+            <button type="submit" 
+                    class="px-4 py-2 bg-status-error text-white rounded-lg hover:bg-status-error/90">
+                Delete User
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

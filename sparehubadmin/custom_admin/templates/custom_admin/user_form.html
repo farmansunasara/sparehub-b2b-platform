@@ -1,0 +1,381 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block title %}{% if action == 'Create' %}Add User{% else %}Edit User{% endif %} - SpareHub Admin{% endblock %}
+
+{% block header %}{% if action == 'Create' %}Add User{% else %}Edit User{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-800">
+            {% if action == 'Create' %}Add New User{% else %}Edit User{% endif %}
+        </h2>
+    </div>
+    <div class="p-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            <div class="space-y-6">
+                <!-- Basic Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Username -->
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Username
+                        </label>
+                        <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}"
+                               value="{{ form.username.value|default_if_none:'' }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                               required>
+                        {% if form.username.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.username.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Email
+                        </label>
+                        <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}"
+                               value="{{ form.email.value|default_if_none:'' }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        {% if form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.email.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password1 (only for create) -->
+                    {% if action == 'Create' %}
+                    <div>
+                        <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Password
+                        </label>
+                        <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                               required>
+                        {% if form.password1.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.password1.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password2 (only for create) -->
+                    <div>
+                        <label for="{{ form.password2.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Confirm Password
+                        </label>
+                        <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                               required>
+                        {% if form.password2.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.password2.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Role -->
+                    <div>
+                        <label for="{{ form.role.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Role
+                        </label>
+                        <select name="{{ form.role.name }}" id="{{ form.role.id_for_label }}"
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                required>
+                            {% for value, label in form.role.field.choices %}
+                                <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.role.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.role.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Manufacturer Fields -->
+                <div id="manufacturer-fields" class="space-y-4 {% if form.role.value != 'manufacturer' %}hidden{% endif %}">
+                    <h3 class="text-lg font-medium text-gray-900">Manufacturer Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Company Name -->
+                        <div>
+                            <label for="{{ form.company_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Company Name
+                            </label>
+                            <input type="text" name="{{ form.company_name.name }}" id="{{ form.company_name.id_for_label }}"
+                                   value="{{ form.company_name.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.company_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.company_name.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contact Name -->
+                        <div>
+                            <label for="{{ form.manufacturer_contact_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Contact Name
+                            </label>
+                            <input type="text" name="{{ form.manufacturer_contact_name.name }}" id="{{ form.manufacturer_contact_name.id_for_label }}"
+                                   value="{{ form.manufacturer_contact_name.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.manufacturer_contact_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.manufacturer_contact_name.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Phone -->
+                        <div>
+                            <label for="{{ form.manufacturer_phone.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Phone
+                            </label>
+                            <input type="text" name="{{ form.manufacturer_phone.name }}" id="{{ form.manufacturer_phone.id_for_label }}"
+                                   value="{{ form.manufacturer_phone.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.manufacturer_phone.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.manufacturer_phone.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- GST Number -->
+                        <div>
+                            <label for="{{ form.manufacturer_gst.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                GST Number
+                            </label>
+                            <input type="text" name="{{ form.manufacturer_gst.name }}" id="{{ form.manufacturer_gst.id_for_label }}"
+                                   value="{{ form.manufacturer_gst.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.manufacturer_gst.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.manufacturer_gst.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Address -->
+                        <div class="md:col-span-2">
+                            <label for="{{ form.manufacturer_address.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Address
+                            </label>
+                            <textarea name="{{ form.manufacturer_address.name }}" id="{{ form.manufacturer_address.id_for_label }}"
+                                      class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">{{ form.manufacturer_address.value|default_if_none:'' }}</textarea>
+                            {% if form.manufacturer_address.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.manufacturer_address.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- City -->
+                        <div>
+                            <label for="{{ form.manufacturer_city.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                City
+                            </label>
+                            <input type="text" name="{{ form.manufacturer_city.name }}" id="{{ form.manufacturer_city.id_for_label }}"
+                                   value="{{ form.manufacturer_city.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.manufacturer_city.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.manufacturer_city.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- State -->
+                        <div>
+                            <label for="{{ form.manufacturer_state.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                State
+                            </label>
+                            <input type="text" name="{{ form.manufacturer_state.name }}" id="{{ form.manufacturer_state.id_for_label }}"
+                                   value="{{ form.manufacturer_state.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.manufacturer_state.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.manufacturer_state.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Country -->
+                        <div>
+                            <label for="{{ form.manufacturer_country.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Country
+                            </label>
+                            <input type="text" name="{{ form.manufacturer_country.name }}" id="{{ form.manufacturer_country.id_for_label }}"
+                                   value="{{ form.manufacturer_country.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.manufacturer_country.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.manufacturer_country.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Logo URL -->
+                        <div class="md:col-span-2">
+                            <label for="{{ form.manufacturer_logo.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Logo URL
+                            </label>
+                            <input type="url" name="{{ form.manufacturer_logo.name }}" id="{{ form.manufacturer_logo.id_for_label }}"
+                                   value="{{ form.manufacturer_logo.value|default_if_none:'' }}"
+                                   placeholder="https://example.com/logo.png"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.manufacturer_logo.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.manufacturer_logo.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shop Fields -->
+                <div id="shop-fields" class="space-y-4 {% if form.role.value != 'shop' %}hidden{% endif %}">
+                    <h3 class="text-lg font-medium text-gray-900">Shop Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Shop Name -->
+                        <div>
+                            <label for="{{ form.shop_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Shop Name
+                            </label>
+                            <input type="text" name="{{ form.shop_name.name }}" id="{{ form.shop_name.id_for_label }}"
+                                   value="{{ form.shop_name.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.shop_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_name.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contact Name -->
+                        <div>
+                            <label for="{{ form.shop_contact_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Contact Name
+                            </label>
+                            <input type="text" name="{{ form.shop_contact_name.name }}" id="{{ form.shop_contact_name.id_for_label }}"
+                                   value="{{ form.shop_contact_name.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.shop_contact_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_contact_name.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Phone -->
+                        <div>
+                            <label for="{{ form.shop_phone.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Phone
+                            </label>
+                            <input type="text" name="{{ form.shop_phone.name }}" id="{{ form.shop_phone.id_for_label }}"
+                                   value="{{ form.shop_phone.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.shop_phone.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_phone.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- GST Number -->
+                        <div>
+                            <label for="{{ form.shop_gst.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                GST Number
+                            </label>
+                            <input type="text" name="{{ form.shop_gst.name }}" id="{{ form.shop_gst.id_for_label }}"
+                                   value="{{ form.shop_gst.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.shop_gst.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_gst.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Address -->
+                        <div class="md:col-span-2">
+                            <label for="{{ form.shop_address.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Address
+                            </label>
+                            <textarea name="{{ form.shop_address.name }}" id="{{ form.shop_address.id_for_label }}"
+                                      class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">{{ form.shop_address.value|default_if_none:'' }}</textarea>
+                            {% if form.shop_address.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_address.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- City -->
+                        <div>
+                            <label for="{{ form.shop_city.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                City
+                            </label>
+                            <input type="text" name="{{ form.shop_city.name }}" id="{{ form.shop_city.id_for_label }}"
+                                   value="{{ form.shop_city.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.shop_city.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_city.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- State -->
+                        <div>
+                            <label for="{{ form.shop_state.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                State
+                            </label>
+                            <input type="text" name="{{ form.shop_state.name }}" id="{{ form.shop_state.id_for_label }}"
+                                   value="{{ form.shop_state.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.shop_state.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_state.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Country -->
+                        <div>
+                            <label for="{{ form.shop_country.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Country
+                            </label>
+                            <input type="text" name="{{ form.shop_country.name }}" id="{{ form.shop_country.id_for_label }}"
+                                   value="{{ form.shop_country.value|default_if_none:'' }}"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.shop_country.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_country.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Logo URL -->
+                        <div class="md:col-span-2">
+                            <label for="{{ form.shop_logo.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Logo URL
+                            </label>
+                            <input type="url" name="{{ form.shop_logo.name }}" id="{{ form.shop_logo.id_for_label }}"
+                                   value="{{ form.shop_logo.value|default_if_none:'' }}"
+                                   placeholder="https://example.com/logo.png"
+                                   class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            {% if form.shop_logo.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.shop_logo.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'custom_admin:users' %}"
+                   class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    {% if action == 'Create' %}Create User{% else %}Update User{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('{{ form.role.id_for_label }}');
+        const manufacturerFields = document.getElementById('manufacturer-fields');
+        const shopFields = document.getElementById('shop-fields');
+
+        function toggleFields() {
+            const role = roleSelect.value;
+            manufacturerFields.classList.add('hidden');
+            shopFields.classList.add('hidden');
+
+            if (role === 'manufacturer') {
+                manufacturerFields.classList.remove('hidden');
+            } else if (role === 'shop') {
+                shopFields.classList.remove('hidden');
+            }
+        }
+
+        toggleFields();
+        roleSelect.addEventListener('change', toggleFields);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Delete Product - SpareHub Admin{% endblock %}
+
+{% block header %}Delete Product{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Confirm Deletion</h3>
+        </div>
+        <div class="p-6">
+            <div class="flex items-center mb-6">
+                {% if product.images.first %}
+                <img src="{{ product.images.first.image.url }}" 
+                     alt="{{ product.name }}"
+                     class="h-16 w-16 rounded-lg object-cover">
+                {% else %}
+                <div class="h-16 w-16 rounded-lg bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-box text-gray-400 text-2xl"></i>
+                </div>
+                {% endif %}
+                <div class="ml-4">
+                    <h4 class="text-lg font-medium text-gray-900">{{ product.name }}</h4>
+                    <p class="text-sm text-gray-500">SKU: {{ product.sku }}</p>
+                </div>
+            </div>
+
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Warning</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p>Are you sure you want to delete this product? This action cannot be undone.</p>
+                            <ul class="list-disc list-inside mt-2">
+                                <li>All product images will be deleted</li>
+                                <li>All related order items will be affected</li>
+                                <li>Product analytics data will be lost</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" class="flex justify-end space-x-3">
+                {% csrf_token %}
+                <a href="{% url 'custom_admin:product_detail' product.id %}" 
+                   class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Delete Product
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}{% if subcategory %}Edit{% else %}Create{% endif %} Subcategory - SpareHub Admin{% endblock %}
+
+{% block header %}{% if subcategory %}Edit{% else %}Create{% endif %} Subcategory{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <form method="post" enctype="multipart/form-data" id="subcategory-form" class="space-y-6">
+        {% csrf_token %}
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Subcategory Information</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700">Category</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                        <div class="mt-1 text-sm text-red-600">{{ form.category.errors.as_text }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700">Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="mt-1 text-sm text-red-600">{{ form.name.errors.as_text }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.slug.id_for_label }}" class="block text-sm font-medium text-gray-700">Slug</label>
+                        {{ form.slug }}
+                        {% if form.slug.errors %}
+                        <div class="mt-1 text-sm text-red-600">{{ form.slug.errors.as_text }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.image.id_for_label }}" class="block text-sm font-medium text-gray-700">Image</label>
+                        {{ form.image }}
+                        {% if subcategory.image %}
+                        <p class="mt-1 text-sm text-gray-500">Current image: <a href="{{ subcategory.image.url }}" target="_blank">View</a></p>
+                        {% endif %}
+                        {% if form.image.errors %}
+                        <div class="mt-1 text-sm text-red-600">{{ form.image.errors.as_text }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="inline-flex items-center mt-6">
+                            {{ form.is_active }}
+                            <span class="ml-2 text-sm text-gray-700">Active</span>
+                        </label>
+                        {% if form.is_active.errors %}
+                        <div class="mt-1 text-sm text-red-600">{{ form.is_active.errors.as_text }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end space-x-3">
+            <a href="{% url 'custom_admin:subcategories' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancel
+            </a>
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                {% if subcategory %}Update{% else %}Create{% endif %} Subcategory
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

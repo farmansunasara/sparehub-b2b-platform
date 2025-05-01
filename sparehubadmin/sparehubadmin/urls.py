@@ -21,7 +21,9 @@ from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('django-admin/', admin.site.urls),
+    path('admin/', include('custom_admin.urls')),  # Our custom admin
+
     path('api/users/', include('users.urls')),
     path('api/products/', include('products.urls')), 
     path('api/addresses/', include('addresses.urls')),
