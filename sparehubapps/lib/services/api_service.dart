@@ -131,26 +131,37 @@ class ApiService {
       final headers = await _getHeaders();
       final response = await request(headers);
 
-      if (response.headers['content-type']?.contains('text/html') ?? false) {
-        _logger.e('Server returned HTML instead of JSON: ${response.body}');
-        throw ApiException(message: 'Server error occurred', statusCode: response.statusCode);
+      // Check for HTML response
+      final contentType = response.headers['content-type']?.toLowerCase() ?? '';
+      final body = response.body;
+      if (contentType.contains('text/html') || body.trim().startsWith('<!DOCTYPE html')) {
+        // Extract error message from HTML if possible
+        final errorMatch = RegExp(r'<pre class="exception_value">(.*?)</pre>').firstMatch(body);
+        final errorMessage = errorMatch != null ? errorMatch.group(1) : 'Server error occurred';
+        _logger.e('Server returned HTML instead of JSON: $errorMessage\nFull Response: $body');
+        throw ApiException(
+          message: 'Server error: $errorMessage',
+          statusCode: response.statusCode,
+        );
       }
 
-      dynamic body;
+      dynamic responseBody;
       try {
-        body = json.decode(response.body);
-        if (body is! Map<String, dynamic> && body is! List) {
-          _logger.e('Unexpected response type: ${body.runtimeType}');
-          throw ApiException(message: 'Invalid response format', statusCode: response.statusCode);
+        if (body.isNotEmpty) {
+          responseBody = json.decode(body);
+          if (responseBody is! Map<String, dynamic> && responseBody is! List) {
+            _logger.e('Unexpected response type: ${responseBody.runtimeType}');
+            throw ApiException(message: 'Invalid response format', statusCode: response.statusCode);
+          }
         }
       } catch (e) {
-        _logger.e('Failed to parse JSON response: $e\nResponse: ${response.body}');
+        _logger.e('Failed to parse JSON response: $e\nResponse: $body');
         throw ApiException(message: 'Invalid response format', statusCode: response.statusCode);
       }
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         _logger.i('API Success: ${response.request?.url}');
-        return body as T;
+        return responseBody as T? ?? {} as T; // Handle empty response
       }
 
       if (response.statusCode == 401) {
@@ -170,13 +181,13 @@ class ApiService {
         }
       }
 
-      _logger.e('API Error: ${response.statusCode} - Response Body: ${response.body}');
+      _logger.e('API Error: ${response.statusCode} - Response Body: $body');
       String errorMessage = 'Something went wrong';
-      if (body is Map<String, dynamic>) {
-        if (body.containsKey('message') || body.containsKey('error') || body.containsKey('detail')) {
-          errorMessage = body['message'] ?? body['error'] ?? body['detail'] ?? errorMessage;
+      if (responseBody is Map<String, dynamic>) {
+        if (responseBody.containsKey('message') || responseBody.containsKey('error') || responseBody.containsKey('detail')) {
+          errorMessage = responseBody['message'] ?? responseBody['error'] ?? responseBody['detail'] ?? errorMessage;
         } else {
-          errorMessage = body.entries
+          errorMessage = responseBody.entries
               .map((e) => '${e.key}: ${e.value is List ? e.value.join(", ") : e.value}')
               .join('; ');
         }
@@ -212,26 +223,35 @@ class ApiService {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      if (response.headers['content-type']?.contains('text/html') ?? false) {
-        _logger.e('Server returned HTML instead of JSON: ${response.body}');
-        throw ApiException(message: 'Server error occurred', statusCode: response.statusCode);
+      // Check for HTML response
+      final contentType = response.headers['content-type']?.toLowerCase() ?? '';
+      final body = response.body;
+      if (contentType.contains('text/html') || body.trim().startsWith('<!DOCTYPE html')) {
+        // Extract error message from HTML if possible
+        final errorMatch = RegExp(r'<pre class="exception_value">(.*?)</pre>').firstMatch(body);
+        final errorMessage = errorMatch != null ? errorMatch.group(1) : 'Server error occurred';
+        _logger.e('Server returned HTML instead of JSON: $errorMessage\nFull Response: $body');
+        throw ApiException(
+          message: 'Server error: $errorMessage',
+          statusCode: response.statusCode,
+        );
       }
 
-      dynamic body;
+      dynamic responseBody;
       try {
-        body = json.decode(response.body);
-        if (body is! Map<String, dynamic> && body is! List) {
-          _logger.e('Unexpected response type: ${body.runtimeType}');
+        responseBody = json.decode(response.body);
+        if (responseBody is! Map<String, dynamic> && responseBody is! List) {
+          _logger.e('Unexpected response type: ${responseBody.runtimeType}');
           throw ApiException(message: 'Invalid response format', statusCode: response.statusCode);
         }
       } catch (e) {
-        _logger.e('Failed to parse JSON response: $e\nResponse: ${response.body}');
+        _logger.e('Failed to parse JSON response: $e\nResponse: $body');
         throw ApiException(message: 'Invalid response format', statusCode: response.statusCode);
       }
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         _logger.i('API Success: ${request.url}');
-        return body as Map<String, dynamic>;
+        return responseBody as Map<String, dynamic>;
       }
 
       if (response.statusCode == 401) {
@@ -261,13 +281,13 @@ class ApiService {
         }
       }
 
-      _logger.e('API Error: ${response.statusCode} - Response Body: ${response.body}');
+      _logger.e('API Error: ${response.statusCode} - Response Body: $body');
       String errorMessage = 'Something went wrong';
-      if (body is Map<String, dynamic>) {
-        if (body.containsKey('message') || body.containsKey('error') || body.containsKey('detail')) {
-          errorMessage = body['message'] ?? body['error'] ?? body['detail'] ?? errorMessage;
+      if (responseBody is Map<String, dynamic>) {
+        if (responseBody.containsKey('message') || responseBody.containsKey('error') || responseBody.containsKey('detail')) {
+          errorMessage = responseBody['message'] ?? responseBody['error'] ?? responseBody['detail'] ?? errorMessage;
         } else {
-          errorMessage = body.entries
+          errorMessage = responseBody.entries
               .map((e) => '${e.key}: ${e.value is List ? e.value.join(", ") : e.value}')
               .join('; ');
         }
@@ -531,12 +551,14 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> createAddress(Map<String, dynamic> address) async {
-    _logger.i('Creating address with payload: $address'); // Log payload
+    _logger.i('Creating address with payload: $address');
+    final jsonBody = json.encode(address);
+    _logger.i('Serialized JSON body: $jsonBody');
     try {
       final response = await _handleResponse<Map<String, dynamic>>((headers) => _client.post(
             Uri.parse('$_baseUrl/addresses/'),
             headers: headers,
-            body: json.encode(address),
+            body: jsonBody,
           ));
       _logger.i('Create address response: $response');
       return response;

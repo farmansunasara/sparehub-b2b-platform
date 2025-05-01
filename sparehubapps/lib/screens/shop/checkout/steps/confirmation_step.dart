@@ -178,14 +178,15 @@ class ConfirmationStep extends StatelessWidget {
             child: ElevatedButton(
               onPressed: checkoutProvider.isLoading
                   ? null
-                  : () => checkoutProvider.placeOrder(),
+                  : () => checkoutProvider.placeOrder(context: context),
               style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                backgroundColor: MaterialStateProperty.all(const Color(0xFFFF9800)),
-                foregroundColor: MaterialStateProperty.all(Colors.white),
-                shape: MaterialStateProperty.all(
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xFFFF9800)),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
               child: checkoutProvider.isLoading
                   ? const SizedBox(
                       width: 24,
@@ -202,8 +203,8 @@ class ConfirmationStep extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-              ),
             ),
+          ), // FIXED: Added missing closing parenthesis
         ],
       ),
     );

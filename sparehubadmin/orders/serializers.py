@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Order, OrderAddress, OrderPayment, OrderStatusUpdate
+from decimal import Decimal
 
 class OrderAddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,11 +17,30 @@ class OrderStatusUpdateSerializer(serializers.ModelSerializer):
         model = OrderStatusUpdate
         fields = '__all__'
 
+class OrderItemSerializer(serializers.Serializer):  # NEW: Serializer for items
+    product_id = serializers.CharField()
+    quantity = serializers.IntegerField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    def to_internal_value(self, data):
+        # Convert incoming data to internal format
+        ret = super().to_internal_value(data)
+        # Ensure price is a Decimal
+        ret['price'] = Decimal(str(data['price']))
+        return ret
+
+    def to_representation(self, instance):
+        # Convert Decimal to float for JSON serialization
+        ret = super().to_representation(instance)
+        ret['price'] = float(ret['price'])
+        return ret
+
 class OrderSerializer(serializers.ModelSerializer):
     shipping_address = OrderAddressSerializer()
     billing_address = OrderAddressSerializer(required=False, allow_null=True)
     payment = OrderPaymentSerializer()
     status_updates = OrderStatusUpdateSerializer(many=True, required=False)
+    items = OrderItemSerializer(many=True)  # NEW: Use OrderItemSerializer
 
     class Meta:
         model = Order
@@ -36,17 +56,30 @@ class OrderSerializer(serializers.ModelSerializer):
         billing_address_data = validated_data.pop('billing_address', None)
         payment_data = validated_data.pop('payment')
         status_updates_data = validated_data.pop('status_updates', [])
+        items_data = validated_data.pop('items')  # Extract items
 
+        # Create nested objects
         shipping_address = OrderAddress.objects.create(**shipping_address_data)
         billing_address = None
         if billing_address_data:
             billing_address = OrderAddress.objects.create(**billing_address_data)
         payment = OrderPayment.objects.create(**payment_data)
 
+        # Convert items_data to JSON-serializable format
+        json_items = [
+            {
+                'product_id': item['product_id'],
+                'quantity': item['quantity'],
+                'price': float(item['price'])  # Convert Decimal to float
+            }
+            for item in items_data
+        ]
+
         order = Order.objects.create(
             shipping_address=shipping_address,
             billing_address=billing_address,
             payment=payment,
+            items=json_items,  # Store items as JSON
             **validated_data
         )
 
@@ -57,11 +90,11 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
 
     def update(self, instance, validated_data):
-        # Update nested serializers
         shipping_address_data = validated_data.pop('shipping_address', None)
         billing_address_data = validated_data.pop('billing_address', None)
         payment_data = validated_data.pop('payment', None)
         status_updates_data = validated_data.pop('status_updates', None)
+        items_data = validated_data.pop('items', None)
 
         if shipping_address_data:
             for attr, value in shipping_address_data.items():
@@ -86,6 +119,17 @@ class OrderSerializer(serializers.ModelSerializer):
             for status_update_data in status_updates_data:
                 status_update = OrderStatusUpdate.objects.create(**status_update_data)
                 instance.status_updates.add(status_update)
+
+        if items_data is not None:
+            # Convert items_data to JSON-serializable format
+            instance.items = [
+                {
+                    'product_id': item['product_id'],
+                    'quantity': item['quantity'],
+                    'price': float(item['price'])  # Convert Decimal to float
+                }
+                for item in items_data
+            ]
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
