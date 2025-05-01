@@ -1,0 +1,2 @@
+C:/Users/meetp/sparehub2/sparehubapps/android/app/.cxx/Debug/6p4a6b73/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/meetp/sparehub2/sparehubapps/android/app/.cxx/Debug/6p4a6b73/x86_64/CMakeFiles/rebuild_cache.dir
