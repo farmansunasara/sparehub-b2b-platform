@@ -8,7 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   static String get baseUrl => _baseUrl;
-  static const String _baseUrl = 'http://192.168.31.155:8000/api';
+  static const String _baseUrl = 'http://192.168.26.2:8000/api';
   static const String _tokenKey = 'auth_token';
   static const String _refreshTokenKey = 'refresh_token';
 
