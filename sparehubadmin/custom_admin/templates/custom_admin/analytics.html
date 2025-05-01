@@ -1,0 +1,185 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Analytics - SpareHub Admin{% endblock %}
+
+{% block header %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <!-- Total Orders -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-gray-500 text-sm font-medium">Total Orders</h3>
+            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Last 30 Days</span>
+        </div>
+        <div class="flex items-center">
+            <span class="text-3xl font-bold text-gray-900">{{ total_orders }}</span>
+            <span class="text-green-500 text-sm font-medium ml-2">
+                <i class="fas fa-arrow-up"></i>
+                15%
+            </span>
+        </div>
+    </div>
+
+    <!-- Total Revenue -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-gray-500 text-sm font-medium">Total Revenue</h3>
+            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Last 30 Days</span>
+        </div>
+        <div class="flex items-center">
+            <span class="text-3xl font-bold text-gray-900">₹{{ total_revenue|floatformat:2 }}</span>
+            <span class="text-green-500 text-sm font-medium ml-2">
+                <i class="fas fa-arrow-up"></i>
+                12%
+            </span>
+        </div>
+    </div>
+
+    <!-- Average Order Value -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-gray-500 text-sm font-medium">Average Order Value</h3>
+            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Last 30 Days</span>
+        </div>
+        <div class="flex items-center">
+            <span class="text-3xl font-bold text-gray-900">₹{{ avg_order_value|floatformat:2 }}</span>
+            <span class="text-green-500 text-sm font-medium ml-2">
+                <i class="fas fa-arrow-up"></i>
+                8%
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Sales Analytics -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900">Sales Analytics</h3>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-500">{{ start_date|date:"M d, Y" }} - {{ end_date|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <canvas id="salesChart" class="w-full h-64"></canvas>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900">Top Products</h3>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-500">By Units Sold</span>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <canvas id="productsChart" class="w-full h-64"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: {{ sales_labels|safe }},
+            datasets: [{
+                label: 'Daily Sales',
+                data: {{ sales_data|safe }},
+                borderColor: 'rgb(79, 70, 229)',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `₹${context.parsed.y.toLocaleString()}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Products Chart
+    const productsCtx = document.getElementById('productsChart').getContext('2d');
+    new Chart(productsCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ product_labels|safe }},
+            datasets: [{
+                label: 'Units Sold',
+                data: {{ product_data|safe }},
+                backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                borderColor: 'rgb(79, 70, 229)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    padding: 12,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,275 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block title %}Settings - SpareHub Admin{% endblock %}
+
+{% block header %}Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Site Settings -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Site Settings</h3>
+        </div>
+        <div class="p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="site_settings">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Site Name -->
+                    <div>
+                        <label for="site_name" class="block text-sm font-medium text-gray-700">Site Name</label>
+                        <input type="text" name="site_name" id="site_name" 
+                               value="{{ settings.site_name }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <!-- Contact Email -->
+                    <div>
+                        <label for="contact_email" class="block text-sm font-medium text-gray-700">Contact Email</label>
+                        <input type="email" name="contact_email" id="contact_email" 
+                               value="{{ settings.contact_email }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <!-- Support Phone -->
+                    <div>
+                        <label for="support_phone" class="block text-sm font-medium text-gray-700">Support Phone</label>
+                        <input type="tel" name="support_phone" id="support_phone" 
+                               value="{{ settings.support_phone }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <!-- Currency -->
+                    <div>
+                        <label for="currency" class="block text-sm font-medium text-gray-700">Currency</label>
+                        <select name="currency" id="currency" 
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="INR" {% if settings.currency == 'INR' %}selected{% endif %}>Indian Rupee (₹)</option>
+                            <option value="USD" {% if settings.currency == 'USD' %}selected{% endif %}>US Dollar ($)</option>
+                            <option value="EUR" {% if settings.currency == 'EUR' %}selected{% endif %}>Euro (€)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700">Business Address</label>
+                    <textarea name="address" id="address" rows="3"
+                              class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">{{ settings.address }}</textarea>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" 
+                            class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Save Site Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Email Settings -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Email Settings</h3>
+        </div>
+        <div class="p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="email_settings">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- SMTP Host -->
+                    <div>
+                        <label for="smtp_host" class="block text-sm font-medium text-gray-700">SMTP Host</label>
+                        <input type="text" name="smtp_host" id="smtp_host" 
+                               value="{{ settings.smtp_host }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <!-- SMTP Port -->
+                    <div>
+                        <label for="smtp_port" class="block text-sm font-medium text-gray-700">SMTP Port</label>
+                        <input type="number" name="smtp_port" id="smtp_port" 
+                               value="{{ settings.smtp_port }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <!-- SMTP Username -->
+                    <div>
+                        <label for="smtp_username" class="block text-sm font-medium text-gray-700">SMTP Username</label>
+                        <input type="text" name="smtp_username" id="smtp_username" 
+                               value="{{ settings.smtp_username }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <!-- SMTP Password -->
+                    <div>
+                        <label for="smtp_password" class="block text-sm font-medium text-gray-700">SMTP Password</label>
+                        <input type="password" name="smtp_password" id="smtp_password" 
+                               value="{{ settings.smtp_password }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" name="smtp_use_tls" id="smtp_use_tls" 
+                           {% if settings.smtp_use_tls %}checked{% endif %}
+                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="smtp_use_tls" class="ml-2 block text-sm text-gray-900">
+                        Use TLS
+                    </label>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="testEmailSettings()" 
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Test Connection
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Save Email Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Settings -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Payment Settings</h3>
+        </div>
+        <div class="p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="payment_settings">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Payment Gateway -->
+                    <div>
+                        <label for="payment_gateway" class="block text-sm font-medium text-gray-700">Payment Gateway</label>
+                        <select name="payment_gateway" id="payment_gateway" 
+                                class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="razorpay" {% if settings.payment_gateway == 'razorpay' %}selected{% endif %}>Razorpay</option>
+                            <option value="stripe" {% if settings.payment_gateway == 'stripe' %}selected{% endif %}>Stripe</option>
+                            <option value="paypal" {% if settings.payment_gateway == 'paypal' %}selected{% endif %}>PayPal</option>
+                        </select>
+                    </div>
+                    
+                    <!-- API Key -->
+                    <div>
+                        <label for="payment_api_key" class="block text-sm font-medium text-gray-700">API Key</label>
+                        <input type="password" name="payment_api_key" id="payment_api_key" 
+                               value="{{ settings.payment_api_key }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <!-- API Secret -->
+                    <div>
+                        <label for="payment_api_secret" class="block text-sm font-medium text-gray-700">API Secret</label>
+                        <input type="password" name="payment_api_secret" id="payment_api_secret" 
+                               value="{{ settings.payment_api_secret }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <!-- Webhook Secret -->
+                    <div>
+                        <label for="payment_webhook_secret" class="block text-sm font-medium text-gray-700">Webhook Secret</label>
+                        <input type="password" name="payment_webhook_secret" id="payment_webhook_secret" 
+                               value="{{ settings.payment_webhook_secret }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" name="payment_test_mode" id="payment_test_mode" 
+                           {% if settings.payment_test_mode %}checked{% endif %}
+                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="payment_test_mode" class="ml-2 block text-sm text-gray-900">
+                        Test Mode
+                    </label>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="testPaymentSettings()" 
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Test Connection
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Save Payment Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function testEmailSettings() {
+    const data = {
+        smtp_host: document.getElementById('smtp_host').value,
+        smtp_port: document.getElementById('smtp_port').value,
+        smtp_username: document.getElementById('smtp_username').value,
+        smtp_password: document.getElementById('smtp_password').value,
+        smtp_use_tls: document.getElementById('smtp_use_tls').checked
+    };
+
+    fetch('/admin/settings/test-email/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Email test successful!');
+        } else {
+            alert('Email test failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error testing email settings: ' + error.message);
+        console.error('Error:', error);
+    });
+}
+
+function testPaymentSettings() {
+    const data = {
+        payment_gateway: document.getElementById('payment_gateway').value,
+        payment_api_key: document.getElementById('payment_api_key').value,
+        payment_api_secret: document.getElementById('payment_api_secret').value,
+        payment_test_mode: document.getElementById('payment_test_mode').checked
+    };
+
+    fetch('/admin/settings/test-payment/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Payment test successful!');
+        } else {
+            alert('Payment test failed: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error testing payment settings: ' + error.message);
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

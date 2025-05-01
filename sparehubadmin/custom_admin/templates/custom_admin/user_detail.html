@@ -1,0 +1,294 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block title %}{{ user.username }} - SpareHub Admin{% endblock %}
+
+{% block header %}User Details{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- User Profile Header -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <img class="h-16 w-16 rounded all-rounded-full" 
+                         src="https://ui-avatars.com/api/?name={{ user.username }}&background=0D8ABC&color=fff" 
+                         alt="{{ user.username }}">
+                    <div class="ml-4">
+                        <h2 class="text-2xl font-bold text-gray-900">{{ user.username }}</h2>
+                        <div class="flex items-center mt-1">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if user.role == 'admin' %}bg-purple-100 text-purple-800
+                                {% elif user.role == 'manufacturer' %}bg-blue-100 text-blue-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ user.role|title }}
+                            </span>
+                            <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ user.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'custom_admin:user_edit' user.id %}" 
+                       class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit User
+                    </a>
+                    {% if user.is_active %}
+                    <form method="post" action="{% url 'custom_admin:user_toggle_status' user.id %}">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                onclick="return confirm('Are you sure you want to deactivate this user?')"
+                                class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                            <i class="fas fa-ban mr-2"></i>
+                            Deactivate
+                        </button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{% url 'custom_admin:user_toggle_status' user.id %}">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                onclick="return confirm('Are you sure you want to activate this user?')"
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            <i class="fas fa-check mr-2"></i>
+                            Activate
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Information -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Basic Information -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.email }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Joined Date</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.created_at|date:"F d, Y" }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Last Updated</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.updated_at|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Information -->
+        {% if user.role == 'manufacturer' and user.manufacturer_profile %}
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Manufacturer Details</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Company Name</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.manufacturer_profile.company_name }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Contact Name</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.manufacturer_profile.contact_name }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Phone</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.manufacturer_profile.phone }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">GST Number</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.manufacturer_profile.gst }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Address</label>
+                    <p class="mt-1 text-sm text-gray-900">
+                        {{ user.manufacturer_profile.address }}<br>
+                        {{ user.manufacturer_profile.city }}, {{ user.manufacturer_profile.state }}<br>
+                        {{ user.manufacturer_profile.country }}
+                    </p>
+                </div>
+                {% if user.manufacturer_profile.logo %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Logo</label>
+                    <img src="{{ user.manufacturer_profile.logo.url }}" alt="Manufacturer Logo" class="mt-1 h-24 w-24 object-contain">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% elif user.role == 'shop' and user.shop_profile %}
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Shop Details</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Shop Name</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.shop_profile.shop_name }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Contact Name</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.shop_profile.contact_name }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Phone</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.shop_profile.phone }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">GST Number</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ user.shop_profile.gst }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Address</label>
+                    <p class="mt-1 text-sm text-gray-900">
+                        {{ user.shop_profile.address }}<br>
+                        {{ user.shop_profile.city }}, {{ user.shop_profile.state }}<br>
+                        {{ user.shop_profile.country }}
+                    </p>
+                </div>
+                {% if user.shop_profile.logo %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Logo</label>
+                    <img src="{{ user.shop_profile.logo.url }}" alt="Shop Logo" class="mt-1 h-24 w-24 object-contain">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Activity & Orders -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Recent Orders -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Recent Orders</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in user.order_set.all|slice:":5" %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ order.id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if order.status == 'delivered' %}bg-green-100 text-green-800
+                                    {% elif order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{{ order.total }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.created_at|date:"M d, Y" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                No orders found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Activity Log</h3>
+            </div>
+            <div class="p-6">
+                <div class="flow-root">
+                    <ul class="-mb-8">
+                        <li class="relative pb-8">
+                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                            <div class="relative flex space-x-3">
+                                <div>
+                                    <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                        <i class="fas fa-user-check text-white"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Account created</p>
+                                    </div>
+                                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                        <time>{{ user.created_at|date:"M d, Y" }}</time>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% if user.updated_at > user.created_at %}
+                        <li class="relative pb-8">
+                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                            <div class="relative flex space-x-3">
+                                <div>
+                                    <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                        <i class="fas fa-edit text-white"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Profile updated</p>
+                                    </div>
+                                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                        <time>{{ user.updated_at|date:"M d, Y" }}</time>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+                        <!-- Placeholder for additional activities -->
+                        {% comment %}
+                        Add more activity entries here if an ActivityLog model exists.
+                        Example:
+                        {% for activity in user.activities.all %}
+                        <li class="relative pb-8">
+                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                            <div class="relative flex space-x-3">
+                                <div>
+                                    <span class="h-8 w-8 rounded-full bg-{{ activity.color }}-500 flex items-center justify-center ring-8 ring-white">
+                                        <i class="fas fa-{{ activity.icon }} text-white"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                    <div>
+                                        <p class="text-sm text-gray-500">{{ activity.description }}</p>
+                                    </div>
+                                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                        <time>{{ activity.created_at|date:"M d, Y" }}</time>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                        {% endcomment %}
+                    </ul>
+                    {% if not user.updated_at > user.created_at %}
+                    <div class="mt-4 text-sm text-gray-500 text-center">
+                        No additional activities recorded.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
