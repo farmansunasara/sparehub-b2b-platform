@@ -28,12 +28,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final theme = Theme.of(context);
     return DefaultTabController(
       length: 3,
-      child: Column(
-        children: [
-          // TabBar
-          TabBar(
-            labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-            unselectedLabelStyle: GoogleFonts.poppins(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Orders', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+          backgroundColor: theme.appBarTheme.backgroundColor,
+          bottom: TabBar(
+            labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14),
+            unselectedLabelStyle: GoogleFonts.poppins(fontSize: 14),
             labelColor: const Color(0xFFFF9800),
             unselectedLabelColor: Colors.grey[600],
             indicatorColor: const Color(0xFFFF9800),
@@ -43,57 +44,54 @@ class _OrdersScreenState extends State<OrdersScreen> {
               Tab(text: 'Completed'),
             ],
           ),
-          // TabBarView
-          Expanded(
-            child: Consumer<OrderProvider>(
-              builder: (context, provider, child) {
-                if (provider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+        ),
+        body: Consumer<OrderProvider>(
+          builder: (context, provider, child) {
+            if (provider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                if (provider.error != null) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          provider.error!,
-                          style: GoogleFonts.poppins(color: Colors.red),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () => provider.refreshOrders(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF9800),
-                            foregroundColor: Colors.white,
-                          ),
-                          child: Text('Retry', style: GoogleFonts.poppins()),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return TabBarView(
+            if (provider.error != null) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _OrdersList(
-                      orders: provider.orders,
-                      emptyMessage: 'No orders yet',
+                    Text(
+                      provider.error!,
+                      style: GoogleFonts.poppins(color: Colors.red),
                     ),
-                    _OrdersList(
-                      orders: provider.pendingOrders,
-                      emptyMessage: 'No active orders',
-                    ),
-                    _OrdersList(
-                      orders: provider.completedOrders,
-                      emptyMessage: 'No completed orders',
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => provider.refreshOrders(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF9800),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text('Retry', style: GoogleFonts.poppins()),
                     ),
                   ],
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              );
+            }
+
+            return TabBarView(
+              children: [
+                _OrdersList(
+                  orders: provider.orders,
+                  emptyMessage: 'No orders yet',
+                ),
+                _OrdersList(
+                  orders: provider.pendingOrders,
+                  emptyMessage: 'No active orders',
+                ),
+                _OrdersList(
+                  orders: provider.completedOrders,
+                  emptyMessage: 'No completed orders',
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
