@@ -1,4 +1,4 @@
-[spare-hub-presentation.pptx](https://github.com/user-attachments/files/21203093/spare-hub-presentation.pptx)# 🚗 SpareHub - Auto Spare Parts Marketplace
+ 🚗 SpareHub - Auto Spare Parts Marketplace
 
 SpareHub is a B2B platform designed to connect car and bike spare parts **manufacturers** and **retailers**. It enables efficient inventory management, product listing, and ordering — all in one place.
 
