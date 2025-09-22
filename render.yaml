@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: sparehub-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
+    startCommand: gunicorn sparehubadmin.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sparehub-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: sparehub-backend.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://sparehub-backend.onrender.com
+      - key: MEDIA_URL
+        value: /media/
+      - key: STATIC_URL
+        value: /static/
+      - key: STATIC_ROOT
+        value: /opt/render/project/src/staticfiles
+      - key: MEDIA_ROOT
+        value: /opt/render/project/src/media
+
+  - type: pserv
+    name: sparehub-db
+    env: postgresql
+    plan: free
+    databaseName: sparehub_db
+    user: sparehub_user
