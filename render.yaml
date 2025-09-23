@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt && python sparehubadmin/manage.py migrate && python sparehubadmin/manage.py collectstatic --noinput
-    startCommand: gunicorn sparehubadmin.sparehubadmin.wsgi:application --chdir sparehubadmin
+    startCommand: gunicorn sparehubadmin.wsgi:application --chdir sparehubadmin
     envVars:
       - key: DEBUG
         value: False
