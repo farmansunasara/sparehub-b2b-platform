@@ -100,7 +100,11 @@ WSGI_APPLICATION = 'sparehubadmin.wsgi.application'
 # Use PostgreSQL for production (Render)
 if config('DATABASE_URL', default=None):
     DATABASES = {
-        'default': dj_database_url.parse(config('DATABASE_URL'))
+        'default': dj_database_url.parse(
+            config('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True   # ✅ Supabase needs SSL
+        )
     }
 else:
     # Fallback to MySQL for local development
