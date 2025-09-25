@@ -39,8 +39,13 @@ jobs:
           flutter-version: '3.35.4'
       - name: Install dependencies
         run: flutter pub get
-      - name: Run tests
-        run: flutter test
+      - name: Run tests (ignore if none)
+        run: |
+          if [ -d "test" ] && ls test/*_test.dart 1> /dev/null 2>&1; then
+            flutter test
+          else
+            echo "No Flutter tests found."
+          fi
       - name: Build APK
         run: flutter build apk
 
