@@ -1,0 +1,53 @@
+# Python/Django
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.env
+.env.*
+*.egg-info/
+media/
+staticfiles/
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+.flutter-*
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Node
+node_modules/
+
+# Misc
+*.swp
+*.swo
+
+# Backup files
+*~
+
+# Android/iOS
+sparehubapps/android/app/debug/
+sparehubapps/android/app/release/
+sparehubapps/ios/Pods/
+sparehubapps/ios/Runner.xcworkspace/

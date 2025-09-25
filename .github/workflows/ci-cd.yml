@@ -46,6 +46,8 @@ jobs:
           else
             echo "No Flutter tests found."
           fi
+      - name: Clean build
+        run: flutter clean
       - name: Build APK
         run: flutter build apk
 
